@@ -1,7 +1,6 @@
-// src/pages/Dashboard/UniversityDashboard.jsx
-
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 // Container animation variants.
 const containerVariants = {
@@ -32,6 +31,8 @@ const buttonVariants = {
 };
 
 const UniversityDashboard = () => {
+  const navigate = useNavigate();
+
   // Data for the university chatbot card.
   const card = {
     id: 1,
@@ -75,6 +76,7 @@ const UniversityDashboard = () => {
             variants={buttonVariants}
             whileHover="hover"
             whileTap="tap"
+            onClick={() => navigate("/chatbot")}
             className="bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-300 transition"
           >
             Chat

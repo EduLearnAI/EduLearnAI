@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { useNavigate } from "react-router-dom";
 
 function Services() {
   const [activeModule, setActiveModule] = useState(null);
+  const navigate = useNavigate();
 
   const modules = [
     {
@@ -150,7 +151,9 @@ function Services() {
               transition={{ duration: 0.5 }}
             >
               <div className="flex items-center justify-start">
-                <span className="text-6xl font-extrabold text-black mr-4">{module.step}</span>
+                <span className="text-6xl font-extrabold text-black mr-4">
+                  {module.step}
+                </span>
                 <motion.h3
                   className={`font-semibold text-gray-900 ${
                     activeModule === module.id ? "text-8xl" : "text-4xl"
@@ -165,7 +168,6 @@ function Services() {
                     className="mt-6 flex flex-col md:flex-row items-center"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.5 }}
                   >
                     <div className={`md:w-1/2 ${module.alignRight ? "order-last" : ""}`}>
@@ -193,14 +195,29 @@ function Services() {
                         className="w-64 h-64 object-cover rounded-lg shadow-lg"
                         whileHover={{ scale: 1.1 }}
                       />
-
                       {/* Deliverables */}
-                      <h5 className="text-xl font-semibold text-gray-900 mt-6">Deliverables:</h5>
+                      <h5 className="text-xl font-semibold text-gray-900 mt-6">
+                        Deliverables:
+                      </h5>
                       <ul className="list-disc list-inside text-gray-700">
                         {module.deliverables.map((deliverable, index) => (
-                          <li key={index} className="text-lg">{deliverable}</li>
+                          <li key={index} className="text-lg">
+                            {deliverable}
+                          </li>
                         ))}
                       </ul>
+                      {/* Chat Button inside the module */}
+                      <motion.button
+                        className="mt-6 bg-yellow-400 text-black py-3 px-6 rounded hover:bg-yellow-300 transition"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/chatbot");
+                        }}
+                      >
+                        Chat with Us
+                      </motion.button>
                     </div>
                   </motion.div>
                 )}

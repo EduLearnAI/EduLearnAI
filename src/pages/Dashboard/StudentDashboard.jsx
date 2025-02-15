@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 // Parent container variants for staggered children animations.
 const containerVariants = {
@@ -30,7 +31,7 @@ const buttonVariants = {
 };
 
 const StudentDashboard = () => {
-  // Sample data for six cards.
+  const navigate = useNavigate(); // Initialize navigate hook
 
   // Cards with RAG: The chatbot uses a provided document to answer questions.
   const cardsWithRag = [
@@ -110,11 +111,12 @@ const StudentDashboard = () => {
       <h3 className="text-xl font-bold">{card.title}</h3>
       {/* Description */}
       <p>{card.description}</p>
-      {/* Chat Button */}
+      {/* Chat Button that navigates to the chatbot page */}
       <motion.button
         variants={buttonVariants}
         whileHover="hover"
         whileTap="tap"
+        onClick={() => navigate("/chatbot")}
         className="bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-300 transition"
       >
         Chat

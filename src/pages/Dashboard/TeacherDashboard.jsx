@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 // Parent container variants for staggered children animations.
 const containerVariants = {
@@ -30,6 +31,8 @@ const buttonVariants = {
 };
 
 const TeacherDashboard = () => {
+  const navigate = useNavigate();
+
   // Data for teacher "create" cards.
   const createCards = [
     {
@@ -159,11 +162,12 @@ const TeacherDashboard = () => {
         <h3 className="text-xl font-bold">{card.title}</h3>
         {/* Card Description */}
         <p>{card.description}</p>
-        {/* Action Button */}
+        {/* Action Button that navigates to the Chatbot page */}
         <motion.button
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
+          onClick={() => navigate("/chatbot")}
           className="bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-300 transition"
         >
           {buttonText}
