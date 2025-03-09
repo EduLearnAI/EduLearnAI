@@ -2,27 +2,22 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Cookies from "js-cookie"; // For reading and writing cookies
+import Cookies from "js-cookie";
 
 function Navbar() {
-  // States to manage dropdown visibility.
   const [showServicesDropdown, setShowServicesDropdown] = useState(false);
   const [showInsightsDropdown, setShowInsightsDropdown] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
-  // Define the backend base URL.
-  const backendBaseUrl = "https://mominah-auth.hf.space";
-
-  // Access token from cookie.
+  // Updated backend base URL
+  const backendBaseUrl = "https://mominah-edulearnai.hf.space";
   const token = Cookies.get("access_token");
 
-  // Local state for user data (including avatar). Initialize from cookie if present.
   const [userData, setUserData] = useState(() => {
     const cookie = Cookies.get("user");
     return cookie ? JSON.parse(cookie) : {};
   });
 
-  // Update userData whenever token changes.
   useEffect(() => {
     if (token) {
       const cookieUser = Cookies.get("user");
@@ -32,17 +27,15 @@ function Navbar() {
     }
   }, [token]);
 
-  // If token exists and the avatar is not set, fetch user data.
   useEffect(() => {
     if (token && !userData.avatar) {
       axios
-        .get(`${backendBaseUrl}/user/data`, {
+        .get(`${backendBaseUrl}/auth/user/data`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
           const data = response.data;
           setUserData(data);
-          // Save the user data in a cookie for reuse.
           Cookies.set("user", JSON.stringify(data), { expires: 7, secure: true });
         })
         .catch((error) => {
@@ -51,17 +44,15 @@ function Navbar() {
     }
   }, [token, userData.avatar, backendBaseUrl]);
 
-  // Get the user's name either from userData or from a cookie.
   const userName = userData.name || Cookies.get("name");
+  // Check if userData.avatar already starts with "/auth/avatar/" before prefixing
+  const userAvatar =
+    userData.avatar && typeof userData.avatar === "string"
+      ? userData.avatar.startsWith("/auth/avatar/")
+        ? `${backendBaseUrl}${userData.avatar}`
+        : `${backendBaseUrl}/auth/avatar/${userData.avatar}`
+      : null;
 
-  // Determine the avatar URL. If relative, prepend the backend URL.
-  const userAvatar = userData.avatar
-    ? userData.avatar.startsWith("/avatars")
-      ? `${backendBaseUrl}${userData.avatar}`
-      : userData.avatar
-    : null;
-
-  // Logout handler: remove cookies and redirect to login.
   const handleLogout = () => {
     Cookies.remove("access_token");
     Cookies.remove("name");
@@ -96,7 +87,6 @@ function Navbar() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5, duration: 1 }}
       >
-        {/* Services Dropdown */}
         <motion.div
           className="relative"
           onMouseEnter={() => setShowServicesDropdown(true)}
@@ -116,7 +106,6 @@ function Navbar() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Updated links to point to the dashboard routes */}
               <Link to="/student-dashboard" className="block py-1 px-2 hover:bg-yellow-200">
                 Student
               </Link>
@@ -130,7 +119,6 @@ function Navbar() {
           )}
         </motion.div>
 
-        {/* Reviews Link */}
         <motion.div
           whileHover={{ scale: 1.1 }}
           transition={{ type: "spring", stiffness: 150 }}
@@ -140,7 +128,6 @@ function Navbar() {
           </Link>
         </motion.div>
 
-        {/* About Us Link */}
         <motion.div
           whileHover={{ scale: 1.1 }}
           transition={{ type: "spring", stiffness: 150 }}
@@ -150,7 +137,6 @@ function Navbar() {
           </Link>
         </motion.div>
 
-        {/* Contact Us Link */}
         <motion.div
           whileHover={{ scale: 1.1 }}
           transition={{ type: "spring", stiffness: 150 }}
@@ -160,7 +146,6 @@ function Navbar() {
           </Link>
         </motion.div>
 
-        {/* Insights Dropdown */}
         <motion.div
           className="relative"
           onMouseEnter={() => setShowInsightsDropdown(true)}
@@ -188,7 +173,7 @@ function Navbar() {
         </motion.div>
       </motion.div>
 
-      {/* Auth Section: Show Login or Profile (with dropdown) */}
+      {/* Auth Section */}
       <motion.div
         className="flex items-center space-x-4"
         whileHover={{ scale: 1.1 }}
@@ -200,7 +185,6 @@ function Navbar() {
             onMouseEnter={() => setShowProfileDropdown(true)}
             onMouseLeave={() => setShowProfileDropdown(false)}
           >
-            {/* Avatar wrapped with a Link to the profile page */}
             <Link to="/profile">
               {userAvatar ? (
                 <img src={userAvatar} alt="Profile" className="h-10 w-10 rounded-full object-cover" />
@@ -210,7 +194,6 @@ function Navbar() {
                 </div>
               )}
             </Link>
-            {/* Dropdown on hover */}
             {showProfileDropdown && (
               <div className="absolute right-0 bg-white text-black shadow-md rounded-lg w-48">
                 <Link to="/profile" className="flex items-center py-2 px-4 border-b hover:bg-yellow-200">

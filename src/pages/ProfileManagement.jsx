@@ -14,12 +14,13 @@ function ProfileManagement() {
   const [loading, setLoading] = useState(false);
 
   const access_token = Cookies.get("access_token");
-  const backendBaseUrl = "https://mominah-auth.hf.space";
+  // Updated backend base URL
+  const backendBaseUrl = "https://mominah-edulearnai.hf.space";
 
   useEffect(() => {
     if (access_token) {
       axios
-        .get(`${backendBaseUrl}/user/data`, {
+        .get(`${backendBaseUrl}/auth/user/data`, {
           headers: { Authorization: `Bearer ${access_token}` },
         })
         .then((response) => {
@@ -28,15 +29,19 @@ function ProfileManagement() {
           setName(userData.name || "");
           setEmail(userData.email || "");
           let avatarUrl = userData.avatar || null;
-          if (avatarUrl && avatarUrl.startsWith("/avatars")) {
-            avatarUrl = backendBaseUrl + avatarUrl;
+          // Check if the avatar URL already includes the proper prefix
+          if (avatarUrl && !avatarUrl.startsWith("/auth/avatar/")) {
+            avatarUrl = `${backendBaseUrl}/auth/avatar/${avatarUrl}`;
+          } else if (avatarUrl) {
+            // If it already starts with /auth/avatar/, prefix with backendBaseUrl
+            avatarUrl = `${backendBaseUrl}${avatarUrl}`;
           }
           setAvatarPreview(avatarUrl);
           Cookies.set("user", JSON.stringify(userData), { expires: 7, secure: true });
         })
         .catch(() => setErrorMsg("Error loading profile data."));
     }
-  }, [access_token]);
+  }, [access_token, backendBaseUrl]);
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -62,13 +67,13 @@ function ProfileManagement() {
       formData.append("email", email);
       if (avatar) formData.append("avatar", avatar);
 
-      const response = await axios.put(`${backendBaseUrl}/user/update`, formData, {
+      const response = await axios.put(`${backendBaseUrl}/auth/user/update`, formData, {
         headers: { Authorization: `Bearer ${access_token}` },
       });
 
       if (response.status === 200) {
         setMessage("Profile updated successfully!");
-        const updatedResponse = await axios.get(`${backendBaseUrl}/user/data`, {
+        const updatedResponse = await axios.get(`${backendBaseUrl}/auth/user/data`, {
           headers: { Authorization: `Bearer ${access_token}` },
         });
         const updatedUser = updatedResponse.data;
@@ -76,8 +81,10 @@ function ProfileManagement() {
         setName(updatedUser.name || "");
         setEmail(updatedUser.email || "");
         let updatedAvatarUrl = updatedUser.avatar || null;
-        if (updatedAvatarUrl && updatedAvatarUrl.startsWith("/avatars")) {
-          updatedAvatarUrl = backendBaseUrl + updatedAvatarUrl;
+        if (updatedAvatarUrl && !updatedAvatarUrl.startsWith("/auth/avatar/")) {
+          updatedAvatarUrl = `${backendBaseUrl}/auth/avatar/${updatedAvatarUrl}`;
+        } else if (updatedAvatarUrl) {
+          updatedAvatarUrl = `${backendBaseUrl}${updatedAvatarUrl}`;
         }
         setAvatarPreview(updatedAvatarUrl);
         Cookies.set("user", JSON.stringify(updatedUser), { expires: 7, secure: true });

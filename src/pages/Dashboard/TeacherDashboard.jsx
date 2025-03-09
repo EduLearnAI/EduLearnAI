@@ -16,17 +16,17 @@ const containerVariants = {
 // Card animation variants with an advanced spring effect.
 const cardVariants = {
   hidden: { opacity: 0, scale: 0.8, y: 20 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
-    y: 0, 
-    transition: { type: "spring", stiffness: 120, damping: 14 } 
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 120, damping: 14 },
   },
 };
 
 // Button animation variants.
 const buttonVariants = {
-  hover: { scale: 1.1, backgroundColor: "#facc15" }, // yellow-400 hex code
+  hover: { scale: 1.1, backgroundColor: "#facc15" },
   tap: { scale: 0.95 },
 };
 
@@ -167,7 +167,11 @@ const TeacherDashboard = () => {
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
-          onClick={() => navigate("/chatbot")}
+          onClick={() =>
+            navigate("/chatbot", {
+              state: { chatbotType: "Teacher", task: card.title },
+            })
+          }
           className="bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-300 transition"
         >
           {buttonText}

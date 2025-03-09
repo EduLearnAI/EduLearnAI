@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import Cookies from "js-cookie"; // Import js-cookie for handling cookies
-import { motion } from "framer-motion"; // Import motion from framer-motion
+import Cookies from "js-cookie"; // For handling cookies
+import { motion } from "framer-motion";
 
 function SignUp() {
   const [name, setName] = useState("");
@@ -15,7 +15,6 @@ function SignUp() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Update state when the user selects a file
   const handleAvatarChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setAvatar(e.target.files[0]);
@@ -33,7 +32,6 @@ function SignUp() {
     setLoading(true);
 
     try {
-      // Create a FormData object to handle file upload
       const formData = new FormData();
       formData.append("name", name);
       formData.append("email", email);
@@ -42,9 +40,8 @@ function SignUp() {
         formData.append("avatar", avatar);
       }
 
-      // Send a POST request with form data.
       const response = await axios.post(
-        "https://mominah-auth.hf.space/signup",
+        "https://mominah-edulearnai.hf.space/auth/signup",
         formData,
         {
           headers: {
@@ -54,13 +51,10 @@ function SignUp() {
       );
 
       if (response.status === 200) {
-        // Optionally, you might want to set tokens in cookies here
+        // Optionally, store tokens here if desired.
         // Cookies.set("access_token", response.data.access_token);
         // Cookies.set("refresh_token", response.data.refresh_token);
         // Cookies.set("name", name);
-        // If an avatar URL is returned, set it in cookies as well
-
-        // Clear the form inputs and navigate to the login page
         setName("");
         setEmail("");
         setPassword("");
@@ -68,7 +62,7 @@ function SignUp() {
         setAvatar(null);
         setErrorMessage("");
 
-        navigate("/Login"); // Navigate to the login page after successful sign-up
+        navigate("/Login");
       }
     } catch (error) {
       if (error.response) {
@@ -111,7 +105,6 @@ function SignUp() {
       >
         <h1 className="text-4xl font-bold mb-6 text-gray-800">Sign Up</h1>
 
-        {/* Display error message */}
         {errorMessage && (
           <motion.div
             className="text-red-500 mb-4"
@@ -245,7 +238,6 @@ function SignUp() {
           </motion.button>
         </form>
 
-        {/* Login Link */}
         <motion.p
           className="mt-4 text-sm text-gray-600"
           initial={{ opacity: 0 }}
@@ -253,10 +245,7 @@ function SignUp() {
           transition={{ duration: 0.5 }}
         >
           Already have an account?{" "}
-          <Link
-            to="/Login"
-            className="text-yellow-400 font-semibold hover:underline"
-          >
+          <Link to="/Login" className="text-yellow-400 font-semibold hover:underline">
             Login
           </Link>
         </motion.p>

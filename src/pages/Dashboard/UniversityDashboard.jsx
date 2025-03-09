@@ -16,11 +16,11 @@ const containerVariants = {
 // Card animation variants.
 const cardVariants = {
   hidden: { opacity: 0, scale: 0.8, y: 20 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
-    y: 0, 
-    transition: { type: "spring", stiffness: 120, damping: 14 } 
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 120, damping: 14 },
   },
 };
 
@@ -76,7 +76,11 @@ const UniversityDashboard = () => {
             variants={buttonVariants}
             whileHover="hover"
             whileTap="tap"
-            onClick={() => navigate("/chatbot")}
+            onClick={() =>
+              navigate("/chatbot", {
+                state: { chatbotType: "University", task: "university prompt" },
+              })
+            }
             className="bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-300 transition"
           >
             Chat

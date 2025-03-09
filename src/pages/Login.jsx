@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import Cookies from "js-cookie"; // Import js-cookie for handling cookies
-import { motion } from "framer-motion"; // Import motion from framer-motion
+import Cookies from "js-cookie"; // For handling cookies
+import { motion } from "framer-motion";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -18,12 +18,12 @@ function Login() {
 
     try {
       const formData = new URLSearchParams();
-      // Note: The backend expects the username field for the email.
       formData.append("username", email);
       formData.append("password", password);
 
+      // Updated backend URL for login
       const response = await axios.post(
-        "https://mominah-auth.hf.space/login",
+        "https://mominah-edulearnai.hf.space/auth/login",
         formData,
         {
           headers: {
@@ -33,18 +33,13 @@ function Login() {
       );
 
       if (response.status === 200) {
-        // Destructure all expected values from the backend response.
         const { access_token, refresh_token, name, avatar } = response.data;
-
-        // Store the tokens and additional user data in cookies.
         Cookies.set("access_token", access_token, { expires: 7, secure: true });
         Cookies.set("refresh_token", refresh_token, { expires: 7, secure: true });
         Cookies.set("name", name, { expires: 7, secure: true });
         if (avatar) {
           Cookies.set("avatar", avatar, { expires: 7, secure: true });
         }
-
-        // Navigate to Services page after successful login.
         navigate("/services");
       }
     } catch (error) {
@@ -67,11 +62,7 @@ function Login() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.5, ease: "easeOut" }}
       >
-        <img
-          src="automation.gif"
-          alt="Automation Logo"
-          className="w-2/3 h-auto"
-        />
+        <img src="automation.gif" alt="Automation Logo" className="w-2/3 h-auto" />
       </motion.div>
 
       {/* Right Side: Login Form */}
@@ -85,7 +76,6 @@ function Login() {
           Login
         </motion.h1>
 
-        {/* Display error message with animation */}
         {errorMessage && (
           <motion.div
             className="text-red-500 mb-4"
@@ -104,10 +94,7 @@ function Login() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <label
-              htmlFor="email"
-              className="block text-lg font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block text-lg font-medium text-gray-700">
               Email Address
             </label>
             <input
@@ -127,10 +114,7 @@ function Login() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <label
-              htmlFor="password"
-              className="block text-lg font-medium text-gray-700"
-            >
+            <label htmlFor="password" className="block text-lg font-medium text-gray-700">
               Password
             </label>
             <input
@@ -144,7 +128,6 @@ function Login() {
             />
           </motion.div>
 
-          {/* Submit Button with hover effect */}
           <motion.button
             type="submit"
             className="w-full bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-300 transition duration-300"
@@ -156,7 +139,6 @@ function Login() {
           </motion.button>
         </form>
 
-        {/* Sign Up Link with fade effect */}
         <motion.p
           className="mt-4 text-sm text-gray-600"
           initial={{ opacity: 0 }}
@@ -164,10 +146,7 @@ function Login() {
           transition={{ duration: 1, delay: 0.5 }}
         >
           Don't have an account?{" "}
-          <Link
-            to="/signup"
-            className="text-yellow-400 font-semibold hover:underline"
-          >
+          <Link to="/signup" className="text-yellow-400 font-semibold hover:underline">
             Sign Up
           </Link>
         </motion.p>
