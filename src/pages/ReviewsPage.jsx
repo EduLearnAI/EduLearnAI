@@ -36,7 +36,6 @@ const reviews = [
   },
 ];
 
-
 function ReviewsPage() {
   const [userReview, setUserReview] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -46,14 +45,14 @@ function ReviewsPage() {
   useEffect(() => {
     // Check if the user is logged in by verifying the access token
     const token = Cookies.get("access_token");
-    setIsLoggedIn(!!token); // Set to true if token exists
+    setIsLoggedIn(!!token);
   }, []);
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const token = Cookies.get("access_token"); // Get access token from cookies
+    const token = Cookies.get("access_token");
     if (!token) {
       setErrorMessage("You must be logged in to leave a review.");
       setLoading(false);
@@ -62,7 +61,7 @@ function ReviewsPage() {
 
     try {
       const response = await axios.post(
-        "https://mominah-auth.hf.space/reviews", // Replace with your FastAPI endpoint
+        "https://mominah-auth.hf.space/reviews",
         { review: userReview },
         {
           headers: {
@@ -88,7 +87,7 @@ function ReviewsPage() {
 
   return (
     <motion.section
-      className="bg-gray-100 min-h-screen py-20 flex flex-col items-center"
+      className="bg-gray-100 min-h-screen py-20 flex flex-col items-center px-4 md:px-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -115,11 +114,11 @@ function ReviewsPage() {
           {reviews.map((review, index) => (
             <motion.div
               key={index}
-              className="min-w-[30%] bg-white shadow-lg rounded-lg p-6 mx-4 flex flex-col"
+              className="min-w-[80%] md:min-w-[30%] bg-white shadow-lg rounded-lg p-6 mx-4 flex flex-col"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
             >
-              <p className="text-black-900 text-lg mb-4">{review.text}</p>
+              <p className="text-black text-lg mb-4">{review.text}</p>
               <div className="mt-auto">
                 <h5 className="font-bold text-gray-900">{review.name}</h5>
                 <p className="text-gray-600 text-sm">{review.position}</p>
@@ -144,7 +143,7 @@ function ReviewsPage() {
           />
           <motion.button
             type="submit"
-            className="mt-4 bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-300 transition duration-300"
+            className="mt-4 bg-yellow-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300"
             disabled={loading}
           >
             {loading ? "Submitting..." : "Submit Review"}
@@ -152,7 +151,14 @@ function ReviewsPage() {
         </form>
       ) : (
         <p className="text-gray-600 mt-10">
-          Please <a href="/login" className="text-yellow-400 hover:underline">log in</a> to leave a review.
+          Please{" "}
+          <a
+            href="/login"
+            className="bg-yellow-400 text-white py-2 px-4 rounded inline-block hover:bg-yellow-500 transition duration-300"
+          >
+            log in
+          </a>{" "}
+          to leave a review.
         </p>
       )}
     </motion.section>

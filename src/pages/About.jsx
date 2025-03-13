@@ -47,72 +47,120 @@ function About() {
   };
 
   return (
-    <motion.div
-      className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6"
-      initial="hidden"
-      animate="visible"
-      variants={pageVariants}
-    >
-      {/* Profile Card */}
+    <>
+      {/* Neon Border & Moving Dots Styles */}
+      <style>{`
+        .neon-border {
+          border: 2px solid #facc15; /* yellow-400 */
+          animation: neon 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes neon {
+          from {
+            box-shadow: 0 0 5px #facc15, 0 0 10px #facc15;
+          }
+          to {
+            box-shadow: 0 0 20px #facc15, 0 0 30px #facc15;
+          }
+        }
+        @keyframes moveDot {
+          0% { top: 0; left: 0; }
+          25% { top: 0; left: calc(100% - 8px); }
+          50% { top: calc(100% - 8px); left: calc(100% - 8px); }
+          75% { top: calc(100% - 8px); left: 0; }
+          100% { top: 0; left: 0; }
+        }
+      `}</style>
+
       <motion.div
-        className="bg-white p-8 rounded-lg shadow-2xl text-center w-full max-w-md mb-8"
-        variants={cardVariants}
-        whileHover="hover"
+        className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6"
+        initial="hidden"
+        animate="visible"
+        variants={pageVariants}
       >
-        <motion.img
-          src="/me.jpg" // Replace with your actual image path
-          alt="Momina Irfan"
-          className="h-32 w-32 rounded-full mx-auto shadow-md"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        />
-        <h2 className="text-3xl font-bold mt-4">Momina Irfan</h2>
-        <p className="text-gray-600 text-sm mt-2">
-          BS-SE Student | AI & Web Developer
-        </p>
-        <p className="mt-4 text-gray-800 font-medium">
-          3+ years of experience in AI & Web Development with a focus on creating engaging user experiences and robust, scalable solutions.
-        </p>
+        {/* Relative container for Profile Card with Neon Border & Dots */}
+        <div className="relative inline-block mb-8">
+          <motion.div
+            className="bg-white p-8 rounded-lg shadow-2xl text-center w-full max-w-md neon-border"
+            variants={cardVariants}
+            whileHover="hover"
+          >
+            <motion.img
+              src="/me.jpg" // Replace with your actual image path
+              alt="Momina Irfan"
+              className="h-32 w-32 rounded-full mx-auto shadow-md"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            />
+            <h2 className="text-3xl font-bold mt-4">Momina Irfan</h2>
+            <p className="text-gray-600 text-sm mt-2">
+              BS-SE Student | AI & Web Developer
+            </p>
+            <p className="mt-4 text-gray-800 font-medium">
+              3+ years of experience in AI & Web Development with a focus on
+              creating engaging user experiences and robust, scalable solutions.
+            </p>
+          </motion.div>
+
+          {/* Animated Moving Dots */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div
+              className="absolute w-2 h-2 bg-yellow-400 rounded-full"
+              style={{ animation: "moveDot 4s linear infinite", animationDelay: "0s" }}
+            ></div>
+            <div
+              className="absolute w-2 h-2 bg-yellow-400 rounded-full"
+              style={{ animation: "moveDot 4s linear infinite", animationDelay: "1s" }}
+            ></div>
+            <div
+              className="absolute w-2 h-2 bg-yellow-400 rounded-full"
+              style={{ animation: "moveDot 4s linear infinite", animationDelay: "2s" }}
+            ></div>
+            <div
+              className="absolute w-2 h-2 bg-yellow-400 rounded-full"
+              style={{ animation: "moveDot 4s linear infinite", animationDelay: "3s" }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Tech Stack Showcase with Alternating Animation Directions */}
+        <div className="mt-10 overflow-hidden w-full max-w-5xl">
+          {/* Forward Scrolling */}
+          <motion.div
+            className="flex space-x-12 items-center"
+            initial={{ x: "100%" }}
+            animate={{ x: "-100%" }}
+            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          >
+            {techStack
+              .filter((tech) => !tech.reverse)
+              .map((tech, index) => (
+                <div key={index} className="flex flex-col items-center">
+                  {tech.icon}
+                  <p className="text-sm font-medium mt-2">{tech.name}</p>
+                </div>
+              ))}
+          </motion.div>
+
+          {/* Reverse Scrolling */}
+          <motion.div
+            className="flex space-x-12 items-center mt-6"
+            initial={{ x: "-100%" }}
+            animate={{ x: "100%" }}
+            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          >
+            {techStack
+              .filter((tech) => tech.reverse)
+              .map((tech, index) => (
+                <div key={index} className="flex flex-col items-center">
+                  {tech.icon}
+                  <p className="text-sm font-medium mt-2">{tech.name}</p>
+                </div>
+              ))}
+          </motion.div>
+        </div>
       </motion.div>
-
-      {/* Tech Stack Showcase with Alternating Animation Directions */}
-      <div className="mt-10 overflow-hidden w-full max-w-5xl">
-        {/* Forward Scrolling */}
-        <motion.div
-          className="flex space-x-12 items-center"
-          initial={{ x: "100%" }}
-          animate={{ x: "-100%" }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-        >
-          {techStack
-            .filter((tech) => !tech.reverse)
-            .map((tech, index) => (
-              <div key={index} className="flex flex-col items-center">
-                {tech.icon}
-                <p className="text-sm font-medium mt-2">{tech.name}</p>
-              </div>
-            ))}
-        </motion.div>
-
-        {/* Reverse Scrolling */}
-        <motion.div
-          className="flex space-x-12 items-center mt-6"
-          initial={{ x: "-100%" }}
-          animate={{ x: "100%" }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-        >
-          {techStack
-            .filter((tech) => tech.reverse)
-            .map((tech, index) => (
-              <div key={index} className="flex flex-col items-center">
-                {tech.icon}
-                <p className="text-sm font-medium mt-2">{tech.name}</p>
-              </div>
-            ))}
-        </motion.div>
-      </div>
-    </motion.div>
+    </>
   );
 }
 

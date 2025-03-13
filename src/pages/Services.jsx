@@ -84,21 +84,21 @@ function Services() {
 
   return (
     <motion.main
-      className="bg-white min-h-screen flex flex-col items-center px-8 py-16"
+      className="bg-white min-h-screen flex flex-col items-center px-4 md:px-8 py-8 md:py-16"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       {/* Header Section */}
-      <section className="flex flex-col lg:flex-row items-center text-center lg:text-left mb-12 w-full">
+      <section className="flex flex-col lg:flex-row items-center text-center lg:text-left mb-8 md:mb-12 w-full">
         <motion.div
-          className="lg:w-1/2 flex flex-col items-center lg:items-start"
+          className="lg:w-1/2 flex flex-col items-center lg:items-start mb-6 lg:mb-0"
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 1 }}
         >
           <motion.h1
-            className="text-8xl font-bold text-black mb-6"
+            className="text-4xl md:text-8xl font-bold text-black mb-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
@@ -107,7 +107,7 @@ function Services() {
             with <span className="text-yellow-400">EduLearn AI</span>
           </motion.h1>
           <motion.p
-            className="text-gray-700 text-lg mt-20 mb-8 leading-relaxed"
+            className="text-gray-700 text-base md:text-lg mt-4 mb-6 leading-relaxed"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
@@ -116,7 +116,7 @@ function Services() {
           </motion.p>
         </motion.div>
         <motion.div
-          className="lg:w-1/2 mb-80 flex justify-center lg:justify-end"
+          className="lg:w-1/2 mb-10 md:mb-80 flex justify-center lg:justify-end"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.8 }}
@@ -124,15 +124,15 @@ function Services() {
           <motion.img
             src="automation.gif"
             alt="Education"
-            className="w-3/4 h-auto rounded-lg shadow-lg"
+            className="w-3/4 md:w-1/2 h-auto rounded-lg shadow-lg"
           />
         </motion.div>
       </section>
 
       {/* Modules Section */}
-      <motion.div className="mt-16 w-full">
+      <motion.div className="mt-8 md:mt-16 w-full">
         <motion.h2
-          className="text-5xl font-bold text-center mb-10 text-gray-800"
+          className="text-3xl md:text-5xl font-bold text-center mb-6 md:mb-10 text-gray-800"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.7 }}
@@ -143,7 +143,7 @@ function Services() {
           {modules.map((module) => (
             <motion.div
               key={module.id}
-              className="w-full p-6 rounded-lg shadow-md mb-6 cursor-pointer"
+              className="w-full p-4 md:p-6 rounded-lg shadow-md mb-4 md:mb-6 cursor-pointer"
               onClick={() => handleModuleClick(module.id)}
               whileHover={{ scale: 1.05 }}
               initial={{ y: 20, opacity: 0 }}
@@ -151,12 +151,12 @@ function Services() {
               transition={{ duration: 0.5 }}
             >
               <div className="flex items-center justify-start">
-                <span className="text-6xl font-extrabold text-black mr-4">
+                <span className="text-4xl md:text-6xl font-extrabold text-black mr-2 md:mr-4">
                   {module.step}
                 </span>
                 <motion.h3
                   className={`font-semibold text-gray-900 ${
-                    activeModule === module.id ? "text-8xl" : "text-4xl"
+                    activeModule === module.id ? "text-4xl md:text-6xl" : "text-2xl md:text-4xl"
                   }`}
                 >
                   {module.title}
@@ -165,50 +165,44 @@ function Services() {
               <AnimatePresence>
                 {activeModule === module.id && (
                   <motion.div
-                    className="mt-6 flex flex-col md:flex-row items-center"
+                    className="mt-4 flex flex-col md:flex-row items-center"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                   >
                     <div className={`md:w-1/2 ${module.alignRight ? "order-last" : ""}`}>
-                      {/* Description */}
                       {module.description.map((para, index) => (
-                        <p key={index} className="text-lg text-gray-700 leading-relaxed mb-4">
+                        <p key={index} className="text-base md:text-lg text-gray-700 leading-relaxed mb-2">
                           {para}
                         </p>
                       ))}
-
-                      {/* Extra Info */}
                       {module.extraInfo.map((info, index) => (
-                        <div key={index} className="mb-4">
-                          <h5 className="text-xl font-semibold text-gray-900">{info.title}</h5>
-                          <p className="text-lg text-gray-700">{info.text}</p>
+                        <div key={index} className="mb-2">
+                          <h5 className="text-xl md:text-2xl font-semibold text-gray-900">{info.title}</h5>
+                          <p className="text-base md:text-lg text-gray-700">{info.text}</p>
                         </div>
                       ))}
                     </div>
 
-                    <div className="md:w-1/2 flex flex-col items-center mt-6 md:mt-0">
-                      {/* Image */}
+                    <div className="md:w-1/2 flex flex-col items-center mt-4 md:mt-0">
                       <motion.img
                         src={module.image}
                         alt={module.title}
-                        className="w-64 h-64 object-cover rounded-lg shadow-lg"
+                        className="w-40 h-40 md:w-64 md:h-64 object-cover rounded-lg shadow-lg"
                         whileHover={{ scale: 1.1 }}
                       />
-                      {/* Deliverables */}
-                      <h5 className="text-xl font-semibold text-gray-900 mt-6">
+                      <h5 className="text-xl md:text-2xl font-semibold text-gray-900 mt-4">
                         Deliverables:
                       </h5>
-                      <ul className="list-disc list-inside text-gray-700">
+                      <ul className="list-disc list-inside text-gray-700 text-base md:text-lg">
                         {module.deliverables.map((deliverable, index) => (
-                          <li key={index} className="text-lg">
+                          <li key={index} className="mb-1">
                             {deliverable}
                           </li>
                         ))}
                       </ul>
-                      {/* Chat Button inside the module */}
                       <motion.button
-                        className="mt-6 bg-yellow-400 text-black py-3 px-6 rounded hover:bg-yellow-300 transition"
+                        className="mt-4 bg-yellow-400 text-black py-2 px-4 md:py-3 md:px-6 rounded hover:bg-yellow-300 transition"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={(e) => {

@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 
 const backendBaseUrl = "https://mominah-edulearnai.hf.space";
 
@@ -19,17 +20,16 @@ const ChatbotPage = () => {
   const [uploadSuccess, setUploadSuccess] = useState("");
   const [isCreatingBot, setIsCreatingBot] = useState(false);
   const [createBotSuccess, setCreateBotSuccess] = useState("");
-  
-  // State to track the current step:
-  // "initializeBot" -> "addData" -> "createNewChat" -> "chatScreen"
+  // State to track the current step.
   const [currentStep, setCurrentStep] = useState("initializeBot");
+  // New state to toggle previous chats on mobile.
+  const [showPrevChats, setShowPrevChats] = useState(false);
 
   const access_token = Cookies.get("access_token");
   const location = useLocation();
   const knowledgeBaseFileInputRef = useRef(null);
 
-  // Determine prompt template type based on navigation.
-  // It first checks if location.state.customPrompt exists; otherwise, it uses task-based logic.
+  // Determine prompt template based on navigation.
   const determineTemplate = () => {
     if (location.state && location.state.customPrompt) {
       return location.state.customPrompt;
@@ -50,8 +50,9 @@ const ChatbotPage = () => {
   };
 
   // =====================
-  // STEP 1: Initialize Bot
+  // Handlers for actions
   // =====================
+  // New Bot
   const handleCreateNewBot = () => {
     if (!access_token) return;
     setIsCreatingBot(true);
@@ -80,9 +81,7 @@ const ChatbotPage = () => {
       });
   };
 
-  // =====================
-  // STEP 2: Add Data
-  // =====================
+  // Add Data: handleKBUpload is triggered on file change (via hidden input)
   const handleKBUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -109,12 +108,9 @@ const ChatbotPage = () => {
     setKbUploading(false);
   };
 
-  // =====================
-  // STEP 3: Create Bot (Build) then Create New Chat
-  // =====================
+  // New Chat
   const handleNewChat = () => {
     if (!botId || !access_token) return;
-    // First, create the bot (build its index) before creating a new chat.
     axios
       .post(
         `${backendBaseUrl}/create_bot/${botId}`,
@@ -122,7 +118,6 @@ const ChatbotPage = () => {
         { headers: { Authorization: `Bearer ${access_token}` } }
       )
       .then(() => {
-        // Then, create a new chat session.
         return axios.post(
           `${backendBaseUrl}/new_chat/${botId}`,
           {},
@@ -178,7 +173,6 @@ const ChatbotPage = () => {
   // =====================
   const handleMicClick = () => {
     console.log("Mic icon clicked");
-    // Add microphone handling functionality here
   };
 
   // =====================
@@ -227,7 +221,7 @@ const ChatbotPage = () => {
         const answer = res.data.response;
         const systemMsg = {
           id: messages.length + 1,
-          text: "",
+          text: answer,
           sender: "system",
           timestamp: new Date().toLocaleTimeString(),
         };
@@ -239,87 +233,105 @@ const ChatbotPage = () => {
   };
 
   return (
-    <div className="flex h-[675px]">
-      {/* Sidebar: Contains step-by-step buttons and previous chats */}
-      <aside className="w-1/4 bg-gray-100 p-4 overflow-y-auto">
+    <div className="flex flex-col md:flex-row h-full min-h-screen">
+      {/* Sidebar */}
+      <aside className="w-full md:w-1/4 bg-gray-100 p-4 overflow-y-auto">
+        {/* New Action Buttons */}
         <div className="mb-6 space-y-4">
-          {currentStep === "initializeBot" && (
-            <>
-              <p className="text-lg font-semibold">Step 1: Initialize Bot</p>
-              <button
-                type="button"
-                onClick={handleCreateNewBot}
-                title="Click to initialize your bot using the prompt type passed via navigation."
-                className={`w-full font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ${
-                  isCreatingBot
-                    ? "bg-yellow-400 text-gray-900 cursor-not-allowed"
-                    : "bg-blue-500 text-white hover:bg-blue-600 hover:scale-105"
-                }`}
-                disabled={isCreatingBot}
-              >
-                {isCreatingBot ? "Initializing..." : "Initialize Bot"}
-              </button>
-              {createBotSuccess && (
-                <div className="mt-2 text-green-600 text-sm">{createBotSuccess}</div>
-              )}
-            </>
-          )}
-          {currentStep === "addData" && (
-            <>
-              <p className="text-lg font-semibold">Step 2: Add Data</p>
-              <button
-                type="button"
-                onClick={() =>
-                  knowledgeBaseFileInputRef.current && knowledgeBaseFileInputRef.current.click()
-                }
-                title="Click to attach a file (e.g., PDF) for additional context."
-                className={`w-full bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 hover:bg-yellow-500 hover:scale-105`}
-              >
-                {kbUploading ? "Uploading Data..." : "Add Data"}
-              </button>
-              {uploadSuccess && (
-                <div className="mt-2 text-green-600 text-sm">{uploadSuccess}</div>
-              )}
-            </>
-          )}
-          {currentStep === "createNewChat" && (
-            <>
-              <p className="text-lg font-semibold">Step 3: Create New Chat</p>
-              <button
-                type="button"
-                onClick={handleNewChat}
-                title="Click to build your bot and start a new chat session."
-                className="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 hover:scale-105 transition-all duration-300"
-              >
-                Create New Chat
-              </button>
-            </>
+          <button
+            type="button"
+            onClick={handleCreateNewBot}
+            title="Create a new bot"
+            className="w-full font-bold py-2 px-4 rounded-lg shadow-md bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 transition-all duration-300"
+          >
+            New Bot
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              knowledgeBaseFileInputRef.current && knowledgeBaseFileInputRef.current.click()
+            }
+            title="Add data to bot"
+            className="w-full bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-500 hover:scale-105 transition-all duration-300"
+          >
+            Add Data
+          </button>
+          <button
+            type="button"
+            onClick={handleNewChat}
+            title="Start a new chat session"
+            className="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 hover:scale-105 transition-all duration-300"
+          >
+            New Chat
+          </button>
+        </div>
+
+        {/* Conditional step instructions (optional) */}
+        {currentStep !== "chatScreen" && (
+          <div className="mb-6">
+            <p className="text-lg font-semibold">
+              Please follow the steps to initialize your bot, add data, and start a new chat.
+            </p>
+          </div>
+        )}
+
+        {/* Previous Chats */}
+        <h2 className="text-lg font-bold mb-2">Previous Chats</h2>
+        {/* Desktop View: Always visible */}
+        <div className="hidden md:block">
+          {chats.length > 0 ? (
+            <ul className="space-y-2">
+              {chats.map((chat) => (
+                <li
+                  key={chat}
+                  className="p-2 rounded hover:bg-gray-300 cursor-pointer transition-all duration-300"
+                  title="Load this chat's conversation history."
+                  onClick={() => loadChatMessages(chat)}
+                >
+                  <div className="font-semibold">Chat: {chat}</div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-600 text-sm">No previous chats found.</p>
           )}
         </div>
-        <h2 className="text-lg font-bold mb-2">Previous Chats</h2>
-        {chats.length > 0 ? (
-          <ul className="space-y-2">
-            {chats.map((chat) => (
-              <li
-                key={chat}
-                className="p-2 rounded hover:bg-gray-300 cursor-pointer transition-all duration-300"
-                title="Click to load this chat's conversation history."
-                onClick={() => loadChatMessages(chat)}
-              >
-                <div className="font-semibold">Chat: {chat}</div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-600 text-sm">No previous chats found.</p>
-        )}
+        {/* Mobile View: Toggle to show/hide previous chats in a collapsible section */}
+        <div className="block md:hidden">
+          <button
+            onClick={() => setShowPrevChats(!showPrevChats)}
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded mb-2"
+          >
+            {showPrevChats ? "Hide Previous Chats" : "Show Previous Chats"}
+          </button>
+          {showPrevChats && (
+            <div className="max-h-40 overflow-y-auto">
+              {chats.length > 0 ? (
+                <ul className="space-y-2">
+                  {chats.map((chat) => (
+                    <li
+                      key={chat}
+                      className="p-2 rounded hover:bg-gray-300 cursor-pointer transition-all duration-300"
+                      title="Load this chat's conversation history."
+                      onClick={() => loadChatMessages(chat)}
+                    >
+                      <div className="font-semibold">Chat: {chat}</div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-600 text-sm">No previous chats found.</p>
+              )}
+            </div>
+          )}
+        </div>
       </aside>
 
       {/* Main Chat/Instruction Area */}
       <div className="flex-1 flex flex-col bg-white">
         {currentStep !== "chatScreen" ? (
-          <div className="flex-1 flex justify-center items-center p-8">
-            <p className="text-lg font-semibold">
+          <div className="flex-1 flex justify-center items-center p-4 md:p-8">
+            <p className="text-lg font-semibold text-center">
               Please follow the steps in the sidebar to initialize your bot, add data, and create a new chat.
             </p>
           </div>
@@ -336,46 +348,91 @@ const ChatbotPage = () => {
                       msg.sender === "user" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"
                     }`}
                   >
-                    {msg.text}
+                    {msg.sender === "system" ? (
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    ) : (
+                      msg.text
+                    )}
                     <div className="text-right text-xs text-gray-500">{msg.timestamp}</div>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="p-4 flex items-center border-t border-gray-300">
-              <motion.button
-                type="button"
-                onClick={() =>
-                  knowledgeBaseFileInputRef.current && knowledgeBaseFileInputRef.current.click()
-                }
-                title="Attach a file (e.g., PDF) for additional context."
-                className="text-xl p-2 hover:bg-gray-200 hover:scale-105 rounded transition-all duration-300"
-              >
-                <FiPaperclip />
-              </motion.button>
-              <motion.button
-                type="button"
-                onClick={handleMicClick}
-                title="Click to record your voice input."
-                className="text-xl p-2 hover:bg-gray-200 hover:scale-105 rounded ml-2 transition-all duration-300"
-              >
-                <FiMic />
-              </motion.button>
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                className="flex-1 mx-4 p-2 border border-gray-300 rounded"
-                placeholder="Type your message"
-              />
-              <motion.button
-                onClick={handleSend}
-                title="Send your message."
-                className="text-xl p-2 hover:bg-gray-200 hover:scale-105 rounded transition-all duration-300"
-              >
-                <FiSend />
-              </motion.button>
+            <div className="p-4 flex flex-col md:flex-row items-center border-t border-gray-300">
+              {/* Mobile Layout for input controls */}
+              <div className="flex flex-col w-full md:hidden">
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                  className="w-full p-2 border border-gray-300 rounded mb-2"
+                  placeholder="Type your message"
+                />
+                <div className="flex justify-between">
+                  <motion.button
+                    type="button"
+                    onClick={() =>
+                      knowledgeBaseFileInputRef.current && knowledgeBaseFileInputRef.current.click()
+                    }
+                    title="Attach a file (e.g., PDF)"
+                    className="p-2 hover:bg-gray-200 hover:scale-105 rounded transition-all duration-300"
+                  >
+                    <FiPaperclip />
+                  </motion.button>
+                  <motion.button
+                    type="button"
+                    onClick={handleMicClick}
+                    title="Record voice input"
+                    className="p-2 hover:bg-gray-200 hover:scale-105 rounded transition-all duration-300"
+                  >
+                    <FiMic />
+                  </motion.button>
+                  <motion.button
+                    onClick={handleSend}
+                    title="Send your message"
+                    className="p-2 hover:bg-gray-200 hover:scale-105 rounded transition-all duration-300"
+                  >
+                    <FiSend />
+                  </motion.button>
+                </div>
+              </div>
+              {/* Desktop Layout for input controls */}
+              <div className="hidden md:flex items-center w-full">
+                <motion.button
+                  type="button"
+                  onClick={() =>
+                    knowledgeBaseFileInputRef.current && knowledgeBaseFileInputRef.current.click()
+                  }
+                  title="Attach a file (e.g., PDF)"
+                  className="p-2 hover:bg-gray-200 hover:scale-105 rounded transition-all duration-300"
+                >
+                  <FiPaperclip />
+                </motion.button>
+                <motion.button
+                  type="button"
+                  onClick={handleMicClick}
+                  title="Record voice input"
+                  className="p-2 ml-2 hover:bg-gray-200 hover:scale-105 rounded transition-all duration-300"
+                >
+                  <FiMic />
+                </motion.button>
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                  className="flex-1 mx-4 p-2 border border-gray-300 rounded"
+                  placeholder="Type your message"
+                />
+                <motion.button
+                  onClick={handleSend}
+                  title="Send your message"
+                  className="p-2 hover:bg-gray-200 hover:scale-105 rounded transition-all duration-300"
+                >
+                  <FiSend />
+                </motion.button>
+              </div>
             </div>
           </>
         )}

@@ -44,7 +44,7 @@ const UniversityDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-8">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 md:p-8">
       <motion.div
         className="max-w-sm w-full"
         variants={containerVariants}
@@ -63,7 +63,7 @@ const UniversityDashboard = () => {
           <img
             src={card.image}
             alt={card.title}
-            className="w-full h-32 object-cover rounded"
+            className="w-full h-32 md:h-40 object-cover rounded"
           />
           {/* Card Heading */}
           <h4 className="text-sm text-gray-500">{card.heading}</h4>
@@ -81,7 +81,7 @@ const UniversityDashboard = () => {
                 state: { chatbotType: "University", task: "university prompt" },
               })
             }
-            className="bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-300 transition"
+            className="bg-yellow-400 text-white py-2 px-4 rounded hover:bg-yellow-500 transition duration-300"
           >
             Chat
           </motion.button>

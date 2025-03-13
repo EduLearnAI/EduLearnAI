@@ -5,6 +5,9 @@ import { Link } from "react-router-dom";
 import Cookies from "js-cookie"; // For handling cookies
 import { motion } from "framer-motion";
 
+// Create a motion-enhanced Link for the Sign Up button
+const MotionLink = motion(Link);
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,7 +57,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-white">
       {/* Left Side: Logo Section */}
       <motion.div
         className="hidden lg:flex flex-col justify-center items-center bg-white w-1/2"
@@ -66,7 +69,7 @@ function Login() {
       </motion.div>
 
       {/* Right Side: Login Form */}
-      <div className="flex flex-col justify-center items-center w-full lg:w-1/2 px-8 py-12">
+      <div className="flex flex-col justify-center items-center w-full lg:w-1/2 px-4 md:px-8 py-8 md:py-12">
         <motion.h1
           className="text-4xl font-bold mb-6 text-gray-800"
           initial={{ opacity: 0 }}
@@ -130,7 +133,7 @@ function Login() {
 
           <motion.button
             type="submit"
-            className="w-full bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-300 transition duration-300"
+            className="w-full bg-yellow-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300"
             disabled={loading}
             whileHover={{ scale: 1.05, rotate: 5 }}
             transition={{ duration: 0.3 }}
@@ -139,17 +142,24 @@ function Login() {
           </motion.button>
         </form>
 
-        <motion.p
-          className="mt-4 text-sm text-gray-600"
+        {/* Updated Sign Up Button */}
+        <motion.div
+          className="mt-4 flex flex-col items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
         >
-          Don't have an account?{" "}
-          <Link to="/signup" className="text-yellow-400 font-semibold hover:underline">
+          <p className="text-sm text-gray-600 mb-2">
+            Don't have an account?
+          </p>
+          <MotionLink
+            to="/signup"
+            className="interactive bg-yellow-400 text-white font-semibold py-2 px-6 rounded-full shadow-md hover:bg-yellow-500 transition duration-300"
+            whileHover={{ scale: 1.05 }}
+          >
             Sign Up
-          </Link>
-        </motion.p>
+          </MotionLink>
+        </motion.div>
       </div>
     </div>
   );

@@ -98,7 +98,7 @@ function ProfileManagement() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <p>Loading profile...</p>
       </div>
     );
@@ -204,7 +204,7 @@ function ProfileManagement() {
 
           <motion.button
             type="submit"
-            className="w-full bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-300"
+            className="w-full bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-300 transition"
             disabled={loading}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

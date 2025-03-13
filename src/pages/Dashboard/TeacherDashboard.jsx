@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
@@ -58,30 +58,6 @@ const TeacherDashboard = () => {
       image: "exam.jpg",
       description:
         "Generate paper content using key reference documents. This feature is ideal for creating research-based assessments or exam papers.",
-    },
-    {
-      id: 4,
-      heading: "Teacher Create - Without Document",
-      title: "Create Quiz",
-      image: "quiz.jpg",
-      description:
-        "Design quizzes quickly without relying on external documents. Use your expertise to craft questions on the fly for immediate use.",
-    },
-    {
-      id: 5,
-      heading: "Teacher Create - Without Document",
-      title: "Create Assignment",
-      image: "assignment.jpg",
-      description:
-        "Craft assignments based solely on your input and experience. This mode is great when you need fast creation without extra references.",
-    },
-    {
-      id: 6,
-      heading: "Teacher Create - Without Document",
-      title: "Create Paper",
-      image: "exam.jpg",
-      description:
-        "Develop paper content without document support. Perfect for creating preliminary drafts or when reference material is not available.",
     },
   ];
 
@@ -172,7 +148,7 @@ const TeacherDashboard = () => {
               state: { chatbotType: "Teacher", task: card.title },
             })
           }
-          className="bg-yellow-400 text-black py-2 px-4 rounded hover:bg-yellow-300 transition"
+          className="bg-yellow-400 text-white py-2 px-4 rounded hover:bg-yellow-300 transition duration-300"
         >
           {buttonText}
         </motion.button>
@@ -183,8 +159,6 @@ const TeacherDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-3xl font-bold text-center mb-8">Teacher Dashboard</h1>
-
-      {/* Section for Creating Content */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-6">Create Content</h2>
         <motion.div
@@ -196,8 +170,6 @@ const TeacherDashboard = () => {
           {createCards.map(renderCard)}
         </motion.div>
       </section>
-
-      {/* Section for Checking Content */}
       <section>
         <h2 className="text-2xl font-semibold mb-6">Check Content</h2>
         <motion.div
