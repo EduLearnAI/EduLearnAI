@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FiSend, FiPaperclip } from "react-icons/fi";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import ReactMarkdown from "react-markdown";
@@ -8,7 +8,6 @@ import ReactMarkdown from "react-markdown";
 const backendBaseUrl = "https://mominah-edulearnai.hf.space";
 
 const ChatbotPage = () => {
-  const navigate = useNavigate();
   // — Core chat states —
   const [botId, setBotId] = useState(Cookies.get("bot_id") || null);
   const [chatId, setChatId] = useState(Cookies.get("chat_id") || null);
@@ -17,7 +16,6 @@ const ChatbotPage = () => {
   const [chats, setChats] = useState([]);
 
   // — Loading states —
-  const [kbUploading, setKbUploading] = useState(false);
   const [isCreatingBot, setIsCreatingBot] = useState(false);
   const [isStartingChat, setIsStartingChat] = useState(false);
   const [ocrProcessing, setOcrProcessing] = useState(false);
@@ -27,10 +25,7 @@ const ChatbotPage = () => {
   const [showPrevChats, setShowPrevChats] = useState(false);
 
   // — File input refs —
-  const kbFileInputRef = useRef(null);
   const ocrFileInputRef = useRef(null);
-
-  // — Text input ref (to focus after results) —
   const inputFieldRef = useRef(null);
 
   const access_token = Cookies.get("access_token");
@@ -55,7 +50,7 @@ const ChatbotPage = () => {
     return "quiz_solving";
   };
 
-  // — Bot/Kb/Chat handlers —
+  // — Bot/Chat handlers —
   const handleCreateNewBot = () => {
     if (!access_token) return;
     setIsCreatingBot(true);
@@ -68,30 +63,10 @@ const ChatbotPage = () => {
       .then((res) => {
         setBotId(res.data.bot_id);
         Cookies.set("bot_id", res.data.bot_id, { expires: 7, secure: true });
-        setCurrentStep("addData");
+        setCurrentStep("createNewChat");
       })
       .catch(console.error)
       .finally(() => setIsCreatingBot(false));
-  };
-
-  const handleKBUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setKbUploading(true);
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("bot_id", botId || "");
-    try {
-      await axios.post(`${backendBaseUrl}/upload_document`, fd, {
-        headers: { Authorization: `Bearer ${access_token}` },
-      });
-      setCurrentStep("createNewChat");
-    } catch (err) {
-      console.error(err);
-    } finally {
-      e.target.value = "";
-      setKbUploading(false);
-    }
   };
 
   const handleNewChat = () => {
@@ -110,11 +85,6 @@ const ChatbotPage = () => {
       })
       .catch(console.error)
       .finally(() => setIsStartingChat(false));
-  };
-
-  // navigate to Video RAG page
-  const handleVideoRag = () => {
-    navigate("/video-rag");
   };
 
   useEffect(() => {
@@ -195,49 +165,32 @@ const ChatbotPage = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-[675px]">
+    <div className="flex flex-col md:flex-row h-[700px]">
       {/* Sidebar */}
       <aside className="w-full md:w-1/4 bg-gray-100 p-4 overflow-y-auto">
-        <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="space-y-4 mb-4">
           <button
             onClick={handleCreateNewBot}
             disabled={isCreatingBot}
-            className={`py-2 px-4 font-bold rounded bg-blue-500 text-white ${
+            className={`w-full py-2 px-4 font-bold rounded bg-blue-500 text-white ${
               isCreatingBot ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"
             }`}
           >
-            {isCreatingBot ? "Creating…" : "New Bot"}
-          </button>
-          <button
-            onClick={() => kbFileInputRef.current.click()}
-            disabled={kbUploading}
-            className={`py-2 px-4 font-bold rounded bg-yellow-400 text-gray-900 ${
-              kbUploading ? "opacity-50 cursor-not-allowed" : "hover:bg-yellow-500"
-            }`}
-          >
-            {kbUploading ? "Uploading…" : "Add Data"}
+            {isCreatingBot ? "Creating…" : "Create Bot"}
           </button>
           <button
             onClick={handleNewChat}
             disabled={isStartingChat}
-            className={`py-2 px-4 font-bold rounded bg-green-500 text-white ${
+            className={`w-full py-2 px-4 font-bold rounded bg-green-500 text-white ${
               isStartingChat ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
             }`}
           >
-            {isStartingChat ? "Starting…" : "New Chat"}
-          </button>
-          <button
-            onClick={handleVideoRag}
-            className="py-2 px-4 font-bold rounded bg-purple-500 text-white hover:bg-purple-600"
-          >
-            Video RAG
+            {isStartingChat ? "Starting…" : "Create Chat"}
           </button>
         </div>
-
         {currentStep !== "chatScreen" && (
-          <p className="text-sm mb-4">Initialize → Add data → New chat</p>
+          <p className="text-sm mb-4">Initialize &rarr; Create Chat</p>
         )}
-
         <h2 className="font-bold mb-2">Previous Chats</h2>
         <div className="hidden md:block">
           {chats.length ? (
@@ -330,14 +283,7 @@ const ChatbotPage = () => {
         )}
       </div>
 
-      {/* Hidden file inputs */}
-      <input
-        ref={kbFileInputRef}
-        type="file"
-        accept="application/pdf"
-        onChange={handleKBUpload}
-        hidden
-      />
+      {/* Hidden OCR file input */}
       <input
         ref={ocrFileInputRef}
         type="file"

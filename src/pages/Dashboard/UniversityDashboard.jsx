@@ -77,8 +77,8 @@ const UniversityDashboard = () => {
             whileHover="hover"
             whileTap="tap"
             onClick={() =>
-              navigate("/chatbot", {
-                state: { chatbotType: "University", task: "university prompt" },
+              navigate("/chatbot-without-rag", {
+                state: { chatbotType: "University", task: card.title },
               })
             }
             className="bg-yellow-400 text-white py-2 px-4 rounded hover:bg-yellow-500 transition duration-300"

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React from "react";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 const containerVariants = {
@@ -84,8 +84,7 @@ const cardsWithoutRag = [
 const StudentDashboard = () => {
   const navigate = useNavigate();
 
-  // Render a single card.
-  const renderCard = (card) => (
+  const renderCard = (card, withRag) => (
     <motion.div
       key={card.id}
       className="bg-white text-black border border-yellow-400 rounded-lg shadow-lg p-6 flex flex-col space-y-4"
@@ -94,27 +93,25 @@ const StudentDashboard = () => {
       animate="visible"
       whileHover={{ scale: 1.03, transition: { duration: 0.3 } }}
     >
-      {/* Card Image */}
       <img
         src={card.image}
         alt={card.title}
         className="w-full h-32 object-cover rounded"
       />
-      {/* Card Heading indicating RAG type */}
       <h4 className="text-sm text-gray-500">{card.heading}</h4>
-      {/* Functionality Title */}
       <h3 className="text-xl font-bold">{card.title}</h3>
-      {/* Description */}
       <p>{card.description}</p>
-      {/* Chat Button that navigates to the chatbot page */}
       <motion.button
         variants={buttonVariants}
         whileHover="hover"
         whileTap="tap"
         onClick={() =>
-          navigate("/chatbot", {
-            state: { chatbotType: "Student", task: card.title },
-          })
+          navigate(
+            withRag ? "/chatbot-with-rag" : "/chatbot-without-rag",
+            {
+              state: { chatbotType: "Student", task: card.title },
+            }
+          )
         }
         className="bg-yellow-400 text-white py-2 px-4 rounded hover:bg-yellow-300 transition duration-300"
       >
@@ -132,8 +129,8 @@ const StudentDashboard = () => {
         initial="hidden"
         animate="visible"
       >
-        {cardsWithRag.map(renderCard)}
-        {cardsWithoutRag.map(renderCard)}
+        {cardsWithRag.map((card) => renderCard(card, true))}
+        {cardsWithoutRag.map((card) => renderCard(card, false))}
       </motion.div>
     </div>
   );

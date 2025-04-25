@@ -14,43 +14,37 @@ function ProfileManagement() {
   const [loading, setLoading] = useState(false);
 
   const access_token = Cookies.get("access_token");
-  // Updated backend base URL
   const backendBaseUrl = "https://mominah-edulearnai.hf.space";
 
   useEffect(() => {
-    if (access_token) {
-      axios
-        .get(`${backendBaseUrl}/auth/user/data`, {
-          headers: { Authorization: `Bearer ${access_token}` },
-        })
-        .then((response) => {
-          const userData = response.data;
-          setUser(userData);
-          setName(userData.name || "");
-          setEmail(userData.email || "");
-          let avatarUrl = userData.avatar || null;
-          // Check if the avatar URL already includes the proper prefix
-          if (avatarUrl && !avatarUrl.startsWith("/auth/avatar/")) {
-            avatarUrl = `${backendBaseUrl}/auth/avatar/${avatarUrl}`;
-          } else if (avatarUrl) {
-            // If it already starts with /auth/avatar/, prefix with backendBaseUrl
-            avatarUrl = `${backendBaseUrl}${avatarUrl}`;
-          }
-          setAvatarPreview(avatarUrl);
-          Cookies.set("user", JSON.stringify(userData), { expires: 7, secure: true });
-        })
-        .catch(() => setErrorMsg("Error loading profile data."));
-    }
-  }, [access_token, backendBaseUrl]);
+    if (!access_token) return;
+    axios
+      .get(`${backendBaseUrl}/auth/user/data`, {
+        headers: { Authorization: `Bearer ${access_token}` },
+      })
+      .then((res) => {
+        const u = res.data;
+        setUser(u);
+        setName(u.name || "");
+        setEmail(u.email || "");
+        let url = u.avatar || null;
+        if (url && !url.startsWith("/auth/avatar/")) {
+          url = `${backendBaseUrl}/auth/avatar/${url}`;
+        } else if (url) {
+          url = `${backendBaseUrl}${url}`;
+        }
+        setAvatarPreview(url);
+        Cookies.set("user", JSON.stringify(u), { expires: 7, secure: true });
+      })
+      .catch(() => setErrorMsg("Error loading profile data."));
+  }, [access_token]);
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     setAvatar(file);
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result);
-      };
+      reader.onloadend = () => setAvatarPreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -67,27 +61,30 @@ function ProfileManagement() {
       formData.append("email", email);
       if (avatar) formData.append("avatar", avatar);
 
-      const response = await axios.put(`${backendBaseUrl}/auth/user/update`, formData, {
-        headers: { Authorization: `Bearer ${access_token}` },
-      });
+      const res = await axios.put(
+        `${backendBaseUrl}/auth/user/update`,
+        formData,
+        { headers: { Authorization: `Bearer ${access_token}` } }
+      );
 
-      if (response.status === 200) {
+      if (res.status === 200) {
         setMessage("Profile updated successfully!");
-        const updatedResponse = await axios.get(`${backendBaseUrl}/auth/user/data`, {
-          headers: { Authorization: `Bearer ${access_token}` },
-        });
-        const updatedUser = updatedResponse.data;
-        setUser(updatedUser);
-        setName(updatedUser.name || "");
-        setEmail(updatedUser.email || "");
-        let updatedAvatarUrl = updatedUser.avatar || null;
-        if (updatedAvatarUrl && !updatedAvatarUrl.startsWith("/auth/avatar/")) {
-          updatedAvatarUrl = `${backendBaseUrl}/auth/avatar/${updatedAvatarUrl}`;
-        } else if (updatedAvatarUrl) {
-          updatedAvatarUrl = `${backendBaseUrl}${updatedAvatarUrl}`;
+        // Re-fetch to update static card
+        const { data: u2 } = await axios.get(
+          `${backendBaseUrl}/auth/user/data`,
+          { headers: { Authorization: `Bearer ${access_token}` } }
+        );
+        setUser(u2);
+        setName(u2.name || "");
+        setEmail(u2.email || "");
+        let newUrl = u2.avatar || null;
+        if (newUrl && !newUrl.startsWith("/auth/avatar/")) {
+          newUrl = `${backendBaseUrl}/auth/avatar/${newUrl}`;
+        } else if (newUrl) {
+          newUrl = `${backendBaseUrl}${newUrl}`;
         }
-        setAvatarPreview(updatedAvatarUrl);
-        Cookies.set("user", JSON.stringify(updatedUser), { expires: 7, secure: true });
+        setAvatarPreview(newUrl);
+        Cookies.set("user", JSON.stringify(u2), { expires: 7, secure: true });
       }
     } catch {
       setErrorMsg("Error updating profile. Please try again.");
@@ -105,115 +102,120 @@ function ProfileManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center items-center p-4">
-      <motion.div
-        className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -30 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h2 className="text-2xl font-bold mb-4 text-center">Manage Profile</h2>
-
-        {/* Success & Error Messages with Smooth Appearance */}
-        <AnimatePresence>
-          {message && (
-            <motion.p
-              className="mb-4 text-green-600 text-center"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              {message}
-            </motion.p>
-          )}
-          {errorMsg && (
-            <motion.p
-              className="mb-4 text-red-600 text-center"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              {errorMsg}
-            </motion.p>
-          )}
-        </AnimatePresence>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex flex-col items-center">
-            {/* Avatar with a smooth transition */}
-            <motion.div
-              className="relative"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              {avatarPreview ? (
-                <motion.img
-                  src={avatarPreview}
-                  alt="Avatar Preview"
-                  className="h-24 w-24 rounded-full object-cover mb-2 shadow-md"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                />
-              ) : (
-                <motion.div
-                  className="h-24 w-24 rounded-full bg-gray-500 flex items-center justify-center text-white text-3xl mb-2 shadow-md"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {name ? name.charAt(0).toUpperCase() : "U"}
-                </motion.div>
-              )}
-            </motion.div>
-            <input type="file" accept="image/*" onChange={handleAvatarChange} className="text-sm" />
-          </div>
-
-          {/* Input Fields */}
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
-            <label htmlFor="name" className="block text-lg font-medium text-gray-700">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-              required
+    <div className="min-h-screen bg-gray-100 flex justify-center items-start p-6">
+      <div className="w-full max-w-6xl flex flex-col md:flex-row gap-8">
+        
+        {/* Left: Your Profile Card */}
+        <motion.div
+          className="md:w-1/2 bg-white rounded-lg shadow-lg p-6 mt-20 flex flex-col items-center min-h-[500px]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          whileHover={{ scale: 1.03 }}
+        >
+          <h3 className="text-2xl font-semibold mb-4">Your Profile</h3>
+          {avatarPreview ? (
+            <img
+              src={avatarPreview}
+              alt="Avatar"
+              className="h-32 w-32 rounded-full object-cover mb-4"
             />
-          </motion.div>
+          ) : (
+            <div className="h-32 w-32 rounded-full bg-gray-300 flex items-center justify-center text-white text-5xl mb-4">
+              {name.charAt(0).toUpperCase()}
+            </div>
+          )}
+          <h4 className="text-xl font-medium">{name}</h4>
+          <p className="text-gray-600">{email}</p>
+        </motion.div>
 
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
-            <label htmlFor="email" className="block text-lg font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
-              required
-            />
-          </motion.div>
+        {/* Right: Update Profile Card */}
+        <motion.div
+          className="md:w-1/2 bg-white rounded-lg mt-20 shadow-lg p-6 min-h-[500px]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          whileHover={{ scale: 1.03 }}
+        >
+          <h3 className="text-2xl font-semibold mb-6 text-center">Update Profile</h3>
 
-          <motion.button
-            type="submit"
-            className="w-full bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-300 transition"
-            disabled={loading}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-          >
-            {loading ? "Updating..." : "Update Profile"}
-          </motion.button>
-        </form>
-      </motion.div>
+          <AnimatePresence>
+            {message && (
+              <motion.div
+                className="mb-4 text-green-600 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {message}
+              </motion.div>
+            )}
+            {errorMsg && (
+              <motion.div
+                className="mb-4 text-red-600 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {errorMsg}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Avatar
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="mt-1 text-sm"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:ring focus:ring-yellow-300 focus:border-yellow-300"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded shadow-sm focus:ring focus:ring-yellow-300 focus:border-yellow-300"
+                required
+              />
+            </div>
+
+            <motion.button
+              type="submit"
+              className="w-full py-2 px-4 font-bold rounded shadow-md bg-yellow-400 text-gray-900 hover:bg-yellow-300 disabled:opacity-50"
+              disabled={loading}
+              whileHover={{ scale: loading ? 1 : 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {loading ? "Updating…" : "Save Changes"}
+            </motion.button>
+          </form>
+        </motion.div>
+
+      </div>
     </div>
   );
 }

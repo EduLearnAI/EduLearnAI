@@ -13,14 +13,21 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import Services from './pages/Services';
 import ReviewsPage from './pages/ReviewsPage';
-import ProfileManagement from './pages/ProfileManagement'; // Profile management page
-import ChatbotPage from './pages/ChatbotPage'; // Chatbot page
+import ProfileManagement from './pages/ProfileManagement';
+import ChatbotWithRag from './pages/ChatbotPage';       // RAG-enabled chatbot
+import ChatbotWithoutRag from './pages/chatbot';        // Simple chatbot (no RAG)
+import VideoRagPage from './pages/VideoRagPage';       // New Video RAG page
 import CustomCursor from './components/CustomCursor';
 
 function App() {
   const location = useLocation();
-  // Hide the Footer when on the Chatbot page
-  const showFooter = location.pathname !== '/chatbot';
+  // Hide the Footer on both chatbot routes and the video-RAG page
+  const hideFooterPaths = [
+    '/chatbot-with-rag',
+    '/chatbot-without-rag',
+    '/video-rag'
+  ];
+  const showFooter = !hideFooterPaths.includes(location.pathname);
 
   return (
     <>
@@ -43,7 +50,15 @@ function App() {
         <Route path="/student-dashboard" element={<StudentDashboard />} />
         <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
         <Route path="/university-dashboard" element={<UniversityDashboard />} />
-        <Route path="/chatbot" element={<ChatbotPage />} />
+
+        {/* Chatbot routes */}
+        <Route path="/chatbot-with-rag" element={<ChatbotWithRag />} />
+        <Route path="/chatbot-without-rag" element={<ChatbotWithoutRag />} />
+
+        {/* Video RAG route */}
+        <Route path="/video-rag" element={<VideoRagPage />} />
+
+        {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 

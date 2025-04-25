@@ -12,109 +12,97 @@ function useIsMobile() {
   return isMobile;
 }
 
-// Variants for the overall page container
+// Animation variants
 const pageVariants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.3, duration: 0.8 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.3, duration: 0.8 } },
 };
-
-// Variants for individual items (form elements)
 const itemVariants = {
   hidden: { opacity: 0, x: -20 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
 };
-
-// Variant for animated circles on the left side (used only on desktop)
 const circleVariants = {
   animate: {
     x: [0, 30, -30, 0],
     y: [0, -20, 20, 0],
     scale: [1, 1.1, 1],
-    transition: {
-      duration: 6,
-      repeat: Infinity,
-      ease: "easeInOut",
-    },
+    transition: { duration: 6, repeat: Infinity, ease: "easeInOut" },
   },
 };
-
-// Button animation variants
 const buttonVariants = {
-  idle: {
-    scale: [1, 1.05, 1],
-    transition: {
-      duration: 1.5,
-      repeat: Infinity,
-      repeatType: "reverse",
-    },
-  },
-  clicked: {
-    scale: [1, 0.9, 1.1, 1],
-    transition: { duration: 0.4 },
-  },
+  idle: { scale: [1, 1.05, 1], transition: { duration: 1.5, repeat: Infinity, repeatType: "reverse" } },
+  clicked: { scale: [1, 0.9, 1.1, 1], transition: { duration: 0.4 } },
 };
 
-function Contact() {
+const CONTACT_URL = "https://mominah-edulearnai.hf.space/contact/";
+
+export default function Contact() {
   const [formData, setFormData] = useState({
     firstName: "",
-    lastName: "",
-    email: "",
-    message: "",
+    lastName:  "",
+    email:     "",
+    message:   "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState("");
-  const isMobile = useIsMobile();
+  const [status, setStatus]       = useState("");
+  const isMobile                   = useIsMobile();
 
   // Update form data as user types
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Submit form data to the backend endpoint
+  // Submit form data
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setStatus("");
 
+    // map camelCase state to snake_case payload
+    const payload = {
+      first_name: formData.firstName,
+      last_name:  formData.lastName,
+      email:      formData.email,
+      message:    formData.message,
+    };
+
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
+      const res = await fetch(CONTACT_URL, {
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body:    JSON.stringify(payload),
       });
 
-      if (response.ok) {
+      if (res.ok) {
         setStatus("Your message has been sent successfully!");
         setFormData({ firstName: "", lastName: "", email: "", message: "" });
       } else {
-        setStatus("There was a problem sending your message. Please try again.");
+        // read and log the server's error details
+        const errData = await res.json().catch(() => null);
+        console.warn("Contact API error:", errData);
+        setStatus("There was a problem sending your message. (See console for details.)");
       }
-    } catch (error) {
+    } catch (err) {
+      console.error("Fetch failed:", err);
       setStatus("Error: Unable to send your message at this time.");
     }
+
     setIsSubmitting(false);
   };
 
   return (
     <>
-      {/* CSS for moving dots and glowing border */}
       <style>{`
         .glow-border {
-          border: 2px solid #facc15; /* yellow-400 */
+          border: 2px solid #facc15;
           box-shadow: 0 0 15px 5px rgba(250, 204, 21, 0.7);
         }
         @keyframes moveDot {
-          0% { top: 0; left: 0; }
-          25% { top: 0; left: calc(100% - 8px); }
-          50% { top: calc(100% - 8px); left: calc(100% - 8px); }
-          75% { top: calc(100% - 8px); left: 0; }
+          0%   { top: 0; left: 0; }
+          25%  { top: 0; left: calc(100% - 8px); }
+          50%  { top: calc(100% - 8px); left: calc(100% - 8px); }
+          75%  { top: calc(100% - 8px); left: 0; }
           100% { top: 0; left: 0; }
         }
       `}</style>
@@ -125,30 +113,23 @@ function Contact() {
         animate="visible"
         variants={pageVariants}
       >
-        {/* Left side animated section – Render only on desktop */}
+        {/* Animated circles on desktop */}
         {!isMobile && (
           <div className="md:w-1/2 flex items-center justify-center p-8 bg-white">
             <div className="space-y-8">
-              <motion.div
-                className="w-32 h-32 bg-yellow-400 rounded-full"
-                variants={circleVariants}
-                animate="animate"
-              />
-              <motion.div
-                className="w-24 h-24 bg-yellow-400 rounded-full"
-                variants={circleVariants}
-                animate="animate"
-              />
-              <motion.div
-                className="w-16 h-16 bg-yellow-400 rounded-full"
-                variants={circleVariants}
-                animate="animate"
-              />
+              {[32, 24, 16].map((size) => (
+                <motion.div
+                  key={size}
+                  className={`w-${size} h-${size} bg-yellow-400 rounded-full`}
+                  variants={circleVariants}
+                  animate="animate"
+                />
+              ))}
             </div>
           </div>
         )}
 
-        {/* Right side: Contact Form with glowing border and moving dots */}
+        {/* Contact form */}
         <div className="md:w-1/2 flex items-center justify-center p-8">
           <div className="relative w-full max-w-md">
             <motion.form
@@ -165,68 +146,26 @@ function Contact() {
                 Contact Us
               </motion.h1>
 
-              <motion.div className="mb-4" variants={itemVariants}>
-                <label
-                  htmlFor="firstName"
-                  className="block text-black font-semibold mb-1"
-                >
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  name="firstName"
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  placeholder="Enter your first name"
-                  className="w-full px-4 py-2 border border-yellow-400 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400 text-black"
-                  required
-                />
-              </motion.div>
+              {["firstName","lastName","email"].map((field) => (
+                <motion.div key={field} className="mb-4" variants={itemVariants}>
+                  <label htmlFor={field} className="block text-black font-semibold mb-1">
+                    {field === "email" ? "Email" : field === "firstName" ? "First Name" : "Last Name"}
+                  </label>
+                  <input
+                    type={field === "email" ? "email" : "text"}
+                    name={field}
+                    id={field}
+                    value={formData[field]}
+                    onChange={handleChange}
+                    placeholder={`Enter your ${field === "email" ? "email" : field.replace(/([A-Z])/g, " $1").toLowerCase().trim()}`}
+                    className="w-full px-4 py-2 border border-yellow-400 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400 text-black"
+                    required
+                  />
+                </motion.div>
+              ))}
 
               <motion.div className="mb-4" variants={itemVariants}>
-                <label
-                  htmlFor="lastName"
-                  className="block text-black font-semibold mb-1"
-                >
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  placeholder="Enter your last name"
-                  className="w-full px-4 py-2 border border-yellow-400 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400 text-black"
-                  required
-                />
-              </motion.div>
-
-              <motion.div className="mb-4" variants={itemVariants}>
-                <label
-                  htmlFor="email"
-                  className="block text-black font-semibold mb-1"
-                >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  className="w-full px-4 py-2 border border-yellow-400 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400 text-black"
-                  required
-                />
-              </motion.div>
-
-              <motion.div className="mb-4" variants={itemVariants}>
-                <label
-                  htmlFor="message"
-                  className="block text-black font-semibold mb-1"
-                >
+                <label htmlFor="message" className="block text-black font-semibold mb-1">
                   Message
                 </label>
                 <textarea
@@ -238,22 +177,20 @@ function Contact() {
                   placeholder="Enter your message"
                   className="w-full px-4 py-2 border border-yellow-400 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400 text-black"
                   required
-                ></textarea>
+                />
               </motion.div>
 
-              <motion.div variants={itemVariants}>
-                <motion.button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-yellow-400 text-white py-2 rounded hover:bg-yellow-500 transition-colors"
-                  variants={buttonVariants}
-                  initial="idle"
-                  whileHover="idle"
-                  whileTap="clicked"
-                >
-                  {isSubmitting ? "Sending..." : "Send Message"}
-                </motion.button>
-              </motion.div>
+              <motion.button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-yellow-400 text-white py-2 rounded hover:bg-yellow-500 transition-colors"
+                variants={buttonVariants}
+                initial="idle"
+                whileHover="idle"
+                whileTap="clicked"
+              >
+                {isSubmitting ? "Sending..." : "Send Message"}
+              </motion.button>
 
               {status && (
                 <motion.p
@@ -265,24 +202,15 @@ function Contact() {
               )}
             </motion.form>
 
-            {/* Animated Moving Dots on the border */}
+            {/* Moving dots */}
             <div className="absolute inset-0 pointer-events-none">
-              <div
-                className="absolute w-2 h-2 bg-yellow-400 rounded-full"
-                style={{ animation: "moveDot 4s linear infinite", animationDelay: "0s" }}
-              ></div>
-              <div
-                className="absolute w-2 h-2 bg-yellow-400 rounded-full"
-                style={{ animation: "moveDot 4s linear infinite", animationDelay: "1s" }}
-              ></div>
-              <div
-                className="absolute w-2 h-2 bg-yellow-400 rounded-full"
-                style={{ animation: "moveDot 4s linear infinite", animationDelay: "2s" }}
-              ></div>
-              <div
-                className="absolute w-2 h-2 bg-yellow-400 rounded-full"
-                style={{ animation: "moveDot 4s linear infinite", animationDelay: "3s" }}
-              ></div>
+              {[0,1,2,3].map((i) => (
+                <div
+                  key={i}
+                  className="absolute w-2 h-2 bg-yellow-400 rounded-full"
+                  style={{ animation: "moveDot 4s linear infinite", animationDelay: `${i}s` }}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -290,5 +218,3 @@ function Contact() {
     </>
   );
 }
-
-export default Contact;
