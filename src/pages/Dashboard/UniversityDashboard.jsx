@@ -1,3 +1,4 @@
+// src/pages/Dashboard/UniversityDashboard.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -38,7 +39,7 @@ const UniversityDashboard = () => {
     id: 1,
     heading: "University Chatbot",
     title: "Ask Your Questions",
-    image: "uni.jpg", // Replace with a proper image if needed.
+    image: "uni.jpg", // Replace with your actual image path.
     description:
       "Have questions about university fees, teacher programs, or other campus-related topics? Our chatbot is here to provide you with quick and accurate answers.",
   };
@@ -65,19 +66,23 @@ const UniversityDashboard = () => {
             alt={card.title}
             className="w-full h-32 md:h-40 object-cover rounded"
           />
+
           {/* Card Heading */}
           <h4 className="text-sm text-gray-500">{card.heading}</h4>
+
           {/* Card Title */}
           <h3 className="text-xl font-bold">{card.title}</h3>
+
           {/* Card Description */}
           <p>{card.description}</p>
+
           {/* Chat Button */}
           <motion.button
             variants={buttonVariants}
             whileHover="hover"
             whileTap="tap"
             onClick={() =>
-              navigate("/chatbot-without-rag", {
+              navigate("/unibot", {
                 state: { chatbotType: "University", task: card.title },
               })
             }

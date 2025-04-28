@@ -1,44 +1,56 @@
-import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
-import Home from './pages/Home';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import NotFound from './pages/NotFound';
-import StudentDashboard from './pages/Dashboard/StudentDashboard';
-import TeacherDashboard from './pages/Dashboard/TeacherDashboard';
-import UniversityDashboard from './pages/Dashboard/UniversityDashboard';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
-import Services from './pages/Services';
-import ReviewsPage from './pages/ReviewsPage';
-import ProfileManagement from './pages/ProfileManagement';
-import ChatbotWithRag from './pages/ChatbotPage';       // RAG-enabled chatbot
-import ChatbotWithoutRag from './pages/chatbot';        // Simple chatbot (no RAG)
-import VideoRagPage from './pages/VideoRagPage';       // New Video RAG page
-import CustomCursor from './components/CustomCursor';
+// src/App.jsx
+import React from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
+
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import CustomCursor from './components/CustomCursor'
+
+import Home from './pages/Home'
+import About from './pages/About'
+import Contact from './pages/Contact'
+import Login from './pages/Login'
+import SignUp from './pages/SignUp'
+import Services from './pages/Services'
+import ReviewsPage from './pages/ReviewsPage'
+import ProfileManagement from './pages/ProfileManagement'
+
+import StudentDashboard from './pages/Dashboard/StudentDashboard'
+import TeacherDashboard from './pages/Dashboard/TeacherDashboard'
+import UniversityDashboard from './pages/Dashboard/UniversityDashboard'
+
+import ChatbotWithRag from './pages/ChatbotPage'
+import ChatbotWithoutRag from './pages/chatbot'
+import VideoRagPage from './pages/VideoRagPage'
+
+// grading page
+import Check from './pages/check'
+
+// new UniBot page
+import UniBot from './pages/unibot'
+
+import NotFound from './pages/NotFound'
 
 function App() {
-  const location = useLocation();
-  // Hide the Footer on both chatbot routes and the video-RAG page
+  const location = useLocation()
+
+  // paths where we do NOT show the footer
   const hideFooterPaths = [
     '/chatbot-with-rag',
     '/chatbot-without-rag',
-    '/video-rag'
-  ];
-  const showFooter = !hideFooterPaths.includes(location.pathname);
+    '/video-rag',
+    '/check',
+    '/unibot',
+  ]
+  const showFooter = !hideFooterPaths.includes(location.pathname)
 
   return (
     <>
-      {/* Custom Animated Cursor */}
       <CustomCursor />
-
-      {/* Navbar */}
       <Navbar />
 
-      {/* Routes */}
       <Routes>
+        {/* Public pages */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
@@ -47,25 +59,30 @@ function App() {
         <Route path="/services" element={<Services />} />
         <Route path="/reviews" element={<ReviewsPage />} />
         <Route path="/profile" element={<ProfileManagement />} />
+
+        {/* Dashboards */}
         <Route path="/student-dashboard" element={<StudentDashboard />} />
         <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
         <Route path="/university-dashboard" element={<UniversityDashboard />} />
 
-        {/* Chatbot routes */}
+        {/* Chatbot & Video-RAG */}
         <Route path="/chatbot-with-rag" element={<ChatbotWithRag />} />
         <Route path="/chatbot-without-rag" element={<ChatbotWithoutRag />} />
-
-        {/* Video RAG route */}
         <Route path="/video-rag" element={<VideoRagPage />} />
+
+        {/* Grading page */}
+        <Route path="/check" element={<Check />} />
+
+        {/* New UniBot page */}
+        <Route path="/unibot" element={<UniBot />} />
 
         {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {/* Conditionally render Footer */}
       {showFooter && <Footer />}
     </>
-  );
+  )
 }
 
-export default App;
+export default App

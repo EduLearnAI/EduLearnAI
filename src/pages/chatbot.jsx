@@ -1,263 +1,144 @@
-import React, { useState, useEffect, useRef } from "react";
-import { FiSend, FiPaperclip } from "react-icons/fi";
-import { useLocation } from "react-router-dom";
-import axios from "axios";
-import Cookies from "js-cookie";
-import ReactMarkdown from "react-markdown";
+import React, { useState, useRef } from 'react'
+import axios from 'axios'
+import ReactMarkdown from 'react-markdown'
+import { FiSend, FiPaperclip } from 'react-icons/fi'
 
-const backendBaseUrl = "https://mominah-edulearnai.hf.space";
+const backendBaseUrl = 'https://mominah-edulearnai.hf.space'
 
-const ChatbotPage = () => {
-  // — Core chat states —
-  const [botId, setBotId] = useState(Cookies.get("bot_id") || null);
-  const [chatId, setChatId] = useState(Cookies.get("chat_id") || null);
-  const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-  const [chats, setChats] = useState([]);
+export default function ChatbotNoRag() {
+  const [sessionId, setSessionId] = useState('')
+  const [messages, setMessages] = useState([])
+  const [inputValue, setInputValue] = useState('')
+  const [loadingSession, setLoadingSession] = useState(false)
+  const [loadingAnswer, setLoadingAnswer] = useState(false)
+  const [ocrProcessing, setOcrProcessing] = useState(false)
+  const [error, setError] = useState('')
 
-  // — Loading states —
-  const [isCreatingBot, setIsCreatingBot] = useState(false);
-  const [isStartingChat, setIsStartingChat] = useState(false);
-  const [ocrProcessing, setOcrProcessing] = useState(false);
+  const inputFieldRef = useRef(null)
+  const ocrFileInputRef = useRef(null)
 
-  // — UI flow & toggles —
-  const [currentStep, setCurrentStep] = useState("initializeBot");
-  const [showPrevChats, setShowPrevChats] = useState(false);
-
-  // — File input refs —
-  const ocrFileInputRef = useRef(null);
-  const inputFieldRef = useRef(null);
-
-  const access_token = Cookies.get("access_token");
-  const location = useLocation();
-
-  // — Determine prompt template —
-  const determineTemplate = () => {
-    if (location.state?.customPrompt) return location.state.customPrompt;
-    if (location.state?.task) {
-      const t = location.state.task.toLowerCase();
-      if (t.includes("solve")) {
-        if (t.includes("quiz")) return "quiz_solving";
-        if (t.includes("assignment")) return "assignment_solving";
-        if (t.includes("paper")) return "paper_solving";
-      }
-      if (t.includes("create")) {
-        if (t.includes("quiz")) return "quiz_creation";
-        if (t.includes("assignment")) return "assignment_creation";
-        if (t.includes("paper")) return "paper_creation";
-      }
-    }
-    return "quiz_solving";
-  };
-
-  // — Bot/Chat handlers —
-  const handleCreateNewBot = () => {
-    if (!access_token) return;
-    setIsCreatingBot(true);
-    axios
-      .post(
-        `${backendBaseUrl}/initialize_bot?prompt_type=${determineTemplate()}`,
-        {},
-        { headers: { Authorization: `Bearer ${access_token}` } }
-      )
-      .then((res) => {
-        setBotId(res.data.bot_id);
-        Cookies.set("bot_id", res.data.bot_id, { expires: 7, secure: true });
-        setCurrentStep("createNewChat");
-      })
-      .catch(console.error)
-      .finally(() => setIsCreatingBot(false));
-  };
-
-  const handleNewChat = () => {
-    if (!botId || !access_token) return;
-    setIsStartingChat(true);
-    axios
-      .post(`${backendBaseUrl}/create_bot/${botId}`, {}, { headers: { Authorization: `Bearer ${access_token}` } })
-      .then(() =>
-        axios.post(`${backendBaseUrl}/new_chat/${botId}`, {}, { headers: { Authorization: `Bearer ${access_token}` } })
-      )
-      .then((res) => {
-        setChatId(res.data.chat_id);
-        Cookies.set("chat_id", res.data.chat_id, { expires: 7, secure: true });
-        setMessages([]);
-        setCurrentStep("chatScreen");
-      })
-      .catch(console.error)
-      .finally(() => setIsStartingChat(false));
-  };
-
-  useEffect(() => {
-    if (access_token && botId) {
-      axios
-        .get(`${backendBaseUrl}/list_chats/${botId}`, { headers: { Authorization: `Bearer ${access_token}` } })
-        .then((res) => setChats(res.data.chat_ids || []))
-        .catch(console.error);
-    }
-  }, [access_token, botId]);
-
-  const loadChatMessages = (cid) => {
-    axios
-      .get(`${backendBaseUrl}/chat_history/${cid}?bot_id=${botId}`, {
-        headers: { Authorization: `Bearer ${access_token}` },
-      })
-      .then((res) => {
-        setMessages(res.data);
-        setChatId(cid);
-        Cookies.set("chat_id", cid, { expires: 7, secure: true });
-        setCurrentStep("chatScreen");
-      })
-      .catch(console.error);
-  };
-
-  // — OCR handler —
-  const handleOCRUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setOcrProcessing(true);
-    const fd = new FormData();
-    fd.append("file", file);
+  // Create a new chat session
+  const handleCreateSession = async () => {
+    setLoadingSession(true)
+    setError('')
+    setMessages([])
     try {
-      const res = await axios.post(`${backendBaseUrl}/upload`, fd);
-      setInputValue(res.data.extracted_text || "");
-      inputFieldRef.current?.focus();
+      const res = await axios.post(`${backendBaseUrl}/norag/session`)
+      const sid = res.data.session_id
+      if (!sid) throw new Error('No session_id in response')
+      setSessionId(sid)
     } catch (err) {
-      console.error("OCR error", err);
+      setError(err.message || 'Failed to create session')
     } finally {
-      e.target.value = "";
-      setOcrProcessing(false);
+      setLoadingSession(false)
     }
-  };
+  }
 
-  // — Chat send & streaming —
-  const streamResponse = (fullText) => {
-    const tokens = fullText.split(" ");
-    let i = 0,
-      cur = "";
-    const id = setInterval(() => {
-      cur += tokens[i] + " ";
-      setMessages((prev) =>
-        prev.map((m, idx) =>
-          idx === prev.length - 1 && m.sender === "system" ? { ...m, text: cur.trim() } : m
-        )
-      );
-      if (++i >= tokens.length) clearInterval(id);
-    }, 100);
-  };
-
-  const handleSend = () => {
-    if (!inputValue.trim() || !botId || !chatId) return;
-    setMessages((prev) => [
-      ...prev,
-      { id: prev.length, text: inputValue, sender: "user", timestamp: new Date().toLocaleTimeString() },
-      { id: prev.length + 1, text: "", sender: "system", timestamp: new Date().toLocaleTimeString() },
-    ]);
-    const q = inputValue;
-    setInputValue("");
-    axios
-      .post(
-        `${backendBaseUrl}/query`,
-        { query: q, bot_id: botId, chat_id: chatId },
-        { headers: { Authorization: `Bearer ${access_token}` } }
+  // OCR upload to prefill input
+  const handleOCRUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setOcrProcessing(true)
+    setError('')
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await axios.post(
+        `${backendBaseUrl}/upload`,
+        fd,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
       )
-      .then((res) => streamResponse(res.data.response))
-      .catch(console.error);
-  };
+      const text = res.data.extracted_text || ''
+      if (!text) throw new Error('No text extracted')
+      setInputValue(text)
+      inputFieldRef.current?.focus()
+    } catch (err) {
+      setError(err.message || 'OCR failed')
+    } finally {
+      e.target.value = ''
+      setOcrProcessing(false)
+    }
+  }
+
+  // Send user message and receive answer
+  const handleSend = async () => {
+    if (!sessionId) {
+      setError('Please create a session first.')
+      return
+    }
+    if (!inputValue.trim()) {
+      setError('Please enter a message.')
+      return
+    }
+    setLoadingAnswer(true)
+    setError('')
+    const userMsg = { sender: 'user', text: inputValue.trim(), timestamp: new Date().toLocaleTimeString() }
+    setMessages(prev => [...prev, userMsg])
+
+    try {
+      const res = await axios.post(
+        `${backendBaseUrl}/norag/chat`,
+        { session_id: sessionId, question: inputValue.trim() },
+        { headers: { 'Content-Type': 'application/json' } }
+      )
+      const ans = res.data.answer
+      if (!ans) throw new Error('No answer in response')
+      const botMsg = { sender: 'system', text: ans, timestamp: new Date().toLocaleTimeString() }
+      setMessages(prev => [...prev, botMsg])
+    } catch (err) {
+      setError(err.message || 'Failed to send message')
+    } finally {
+      setLoadingAnswer(false)
+      setInputValue('')
+      inputFieldRef.current?.focus()
+    }
+  }
 
   return (
-    <div className="flex flex-col md:flex-row h-[700px]">
+    <div className="flex flex-col md:flex-row h-screen">
       {/* Sidebar */}
       <aside className="w-full md:w-1/4 bg-gray-100 p-4 overflow-y-auto">
-        <div className="space-y-4 mb-4">
-          <button
-            onClick={handleCreateNewBot}
-            disabled={isCreatingBot}
-            className={`w-full py-2 px-4 font-bold rounded bg-blue-500 text-white ${
-              isCreatingBot ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"
-            }`}
-          >
-            {isCreatingBot ? "Creating…" : "Create Bot"}
-          </button>
-          <button
-            onClick={handleNewChat}
-            disabled={isStartingChat}
-            className={`w-full py-2 px-4 font-bold rounded bg-green-500 text-white ${
-              isStartingChat ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
-            }`}
-          >
-            {isStartingChat ? "Starting…" : "Create Chat"}
-          </button>
-        </div>
-        {currentStep !== "chatScreen" && (
-          <p className="text-sm mb-4">Initialize &rarr; Create Chat</p>
+        <button
+          onClick={handleCreateSession}
+          disabled={loadingSession}
+          className={`w-full py-2 px-4 font-bold rounded bg-blue-500 text-white ${loadingSession ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
+        >
+          {loadingSession ? 'Creating…' : 'New Chat'}
+        </button>
+
+        {sessionId && (
+          <div className="text-sm mt-4">
+            <span className="font-medium">Session ID:</span> {sessionId}
+          </div>
         )}
-        <h2 className="font-bold mb-2">Previous Chats</h2>
-        <div className="hidden md:block">
-          {chats.length ? (
-            chats.map((c) => (
-              <div
-                key={c}
-                onClick={() => loadChatMessages(c)}
-                className="p-2 rounded hover:bg-gray-300 cursor-pointer mb-1 text-sm"
-              >
-                Chat: {c}
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-600 text-sm">No chats</p>
-          )}
-        </div>
-        <div className="md:hidden">
-          <button
-            onClick={() => setShowPrevChats(!showPrevChats)}
-            className="w-full bg-blue-500 text-white py-2 rounded mb-2 text-sm"
-          >
-            {showPrevChats ? "Hide Chats" : "Show Chats"}
-          </button>
-          {showPrevChats &&
-            (chats.length ? (
-              chats.map((c) => (
-                <div
-                  key={c}
-                  onClick={() => loadChatMessages(c)}
-                  className="p-2 rounded hover:bg-gray-300 cursor-pointer mb-1 text-sm"
-                >
-                  Chat: {c}
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-600 text-sm">No chats</p>
-            ))}
-        </div>
+
+        {error && (
+          <div className="text-red-600 text-sm mt-2">
+            <strong>Error:</strong> {error}
+          </div>
+        )}
       </aside>
 
       {/* Main Chat */}
       <div className="flex-1 flex flex-col bg-white">
-        {currentStep !== "chatScreen" ? (
+        {!sessionId ? (
           <div className="flex-1 flex items-center justify-center p-4">
-            <p className="text-sm">Follow sidebar steps to get started.</p>
+            <p className="text-sm">Click "New Chat" to get started.</p>
           </div>
         ) : (
-          <>
-            <div className="flex-1 overflow-y-auto p-2">
-              {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`flex my-1 ${m.sender === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-xs px-2 py-1 rounded ${
-                      m.sender === "user" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"
-                    } text-sm`}
-                  >
-                    {m.sender === "system" ? <ReactMarkdown>{m.text}</ReactMarkdown> : m.text}
-                    <div className="text-xs text-gray-500 text-right">{m.timestamp}</div>
+          <>  
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {messages.map((m, idx) => (
+                <div key={idx} className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>  
+                  <div className={`max-w-xs px-3 py-2 rounded ${m.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'} text-sm`}>  
+                    {m.sender === 'system' ? <ReactMarkdown>{m.text}</ReactMarkdown> : m.text}
+                    <div className="text-xs text-gray-500 text-right mt-1">{m.timestamp}</div>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Input bar */}
+            {/* Input Bar */}
             <div className="border-t border-gray-300 p-2 flex items-center space-x-2">
               <button
                 onClick={() => ocrFileInputRef.current.click()}
@@ -271,9 +152,9 @@ const ChatbotPage = () => {
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
-                placeholder="Type your message"
+                placeholder="Type your message…"
               />
               <button onClick={handleSend} className="p-1 hover:bg-gray-200 rounded">
                 <FiSend size={20} />
@@ -283,16 +164,14 @@ const ChatbotPage = () => {
         )}
       </div>
 
-      {/* Hidden OCR file input */}
+      {/* Hidden File Input */}
       <input
         ref={ocrFileInputRef}
         type="file"
-        accept="application/pdf,image/*"
+        accept=".pdf,image/*"
         onChange={handleOCRUpload}
         hidden
       />
     </div>
-  );
-};
-
-export default ChatbotPage;
+  )
+}

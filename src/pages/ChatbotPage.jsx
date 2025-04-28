@@ -334,14 +334,14 @@ const ChatbotPage = () => {
       <input
         ref={kbFileInputRef}
         type="file"
-        accept="application/pdf"
+        accept=".csv,.doc,.docx,.epub,image/*,.md,.msg,.odt,.org,.pdf,.ppt,.pptx,.rtf,.rst,.tsv,.xlsx"
         onChange={handleKBUpload}
         hidden
       />
       <input
         ref={ocrFileInputRef}
         type="file"
-        accept="application/pdf,image/*"
+        accept=".pdf,image/*"
         onChange={handleOCRUpload}
         hidden
       />
