@@ -95,7 +95,7 @@ export default function ChatbotNoRag() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen">
+    <div className="flex flex-col md:flex-row h-[675px]">
       {/* Sidebar */}
       <aside className="w-full md:w-1/4 bg-gray-100 p-4 overflow-y-auto">
         <button
