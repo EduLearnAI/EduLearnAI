@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
 
-// Create a motion-enhanced Link
+// Motion-enhanced Link for Sign Up button
 const MotionLink = motion(Link);
 
 function Login() {
@@ -24,6 +23,7 @@ function Login() {
       formData.append("username", email);
       formData.append("password", password);
 
+      // Login request
       const loginResponse = await axios.post(
         "https://mominah-edulearnai.hf.space/auth/login",
         formData,
@@ -35,34 +35,25 @@ function Login() {
       );
 
       if (loginResponse.status === 200) {
-        const { access_token, refresh_token } = loginResponse.data;
+        const { access_token, refresh_token, name, avatar } = loginResponse.data;
 
-        // Store tokens securely
+        // Save tokens and user info in cookies
         Cookies.set("access_token", access_token, { expires: 7, secure: true });
         Cookies.set("refresh_token", refresh_token, { expires: 7, secure: true });
-
-        // Now fetch user data using the access token
-        const userDataResponse = await axios.get(
-          "https://mominah-edulearnai.hf.space/auth/user/data",
-          {
-            headers: {
-              Authorization: `Bearer ${access_token}`,
-            },
-          }
-        );
-
-        if (userDataResponse.status === 200) {
-          const { name, avatar } = userDataResponse.data;
-
-          // Store user info in cookies (or localStorage)
-          Cookies.set("name", name, { expires: 7, secure: true });
-          if (avatar) {
-            Cookies.set("avatar", avatar, { expires: 7, secure: true });
-          }
-
-          // Redirect after full auth + data load
-          navigate("/services");
+        Cookies.set("name", name, { expires: 7, secure: true });
+        if (avatar) {
+          Cookies.set("avatar", avatar, { expires: 7, secure: true });
         }
+
+        // ✅ Fetch user data with access token
+        await axios.get("https://mominah-edulearnai.hf.space/auth/user/data", {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        });
+
+        // Redirect to services/dashboard
+        navigate("/services");
       }
     } catch (error) {
       if (error.response) {
@@ -77,7 +68,7 @@ function Login() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white">
-      {/* Left Side: Logo Section */}
+      {/* Left Side: Logo */}
       <motion.div
         className="hidden lg:flex flex-col justify-center items-center bg-white w-1/2"
         initial={{ opacity: 0, scale: 0.9 }}
@@ -150,6 +141,7 @@ function Login() {
             />
           </motion.div>
 
+          {/* Submit Button */}
           <motion.button
             type="submit"
             className="w-full bg-yellow-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300"
@@ -161,14 +153,16 @@ function Login() {
           </motion.button>
         </form>
 
-        {/* Sign Up Button */}
+        {/* Sign Up Link */}
         <motion.div
           className="mt-4 flex flex-col items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
         >
-          <p className="text-sm text-gray-600 mb-2">Don't have an account?</p>
+          <p className="text-sm text-gray-600 mb-2">
+            Don't have an account?
+          </p>
           <MotionLink
             to="/signup"
             className="interactive bg-yellow-400 text-white font-semibold py-2 px-6 rounded-full shadow-md hover:bg-yellow-500 transition duration-300"
