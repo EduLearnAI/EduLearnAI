@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
-import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import Cookies from "js-cookie"; // For handling cookies
 import { motion } from "framer-motion";
 
-// Motion-enhanced Link for Sign Up button
+// Create a motion-enhanced Link for the Sign Up button
 const MotionLink = motion(Link);
 
 function Login() {
@@ -23,8 +24,8 @@ function Login() {
       formData.append("username", email);
       formData.append("password", password);
 
-      // Login request
-      const loginResponse = await axios.post(
+      // Updated backend URL for login
+      const response = await axios.post(
         "https://mominah-edulearnai.hf.space/auth/login",
         formData,
         {
@@ -34,25 +35,14 @@ function Login() {
         }
       );
 
-      if (loginResponse.status === 200) {
-        const { access_token, refresh_token, name, avatar } = loginResponse.data;
-
-        // Save tokens and user info in cookies
+      if (response.status === 200) {
+        const { access_token, refresh_token, name, avatar } = response.data;
         Cookies.set("access_token", access_token, { expires: 7, secure: true });
         Cookies.set("refresh_token", refresh_token, { expires: 7, secure: true });
         Cookies.set("name", name, { expires: 7, secure: true });
         if (avatar) {
           Cookies.set("avatar", avatar, { expires: 7, secure: true });
         }
-
-        // ✅ Fetch user data with access token
-        await axios.get("https://mominah-edulearnai.hf.space/auth/user/data", {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
-        });
-
-        // Redirect to services/dashboard
         navigate("/services");
       }
     } catch (error) {
@@ -68,7 +58,7 @@ function Login() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white">
-      {/* Left Side: Logo */}
+      {/* Left Side: Logo Section */}
       <motion.div
         className="hidden lg:flex flex-col justify-center items-center bg-white w-1/2"
         initial={{ opacity: 0, scale: 0.9 }}
@@ -141,7 +131,6 @@ function Login() {
             />
           </motion.div>
 
-          {/* Submit Button */}
           <motion.button
             type="submit"
             className="w-full bg-yellow-400 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300"
@@ -153,7 +142,7 @@ function Login() {
           </motion.button>
         </form>
 
-        {/* Sign Up Link */}
+        {/* Updated Sign Up Button */}
         <motion.div
           className="mt-4 flex flex-col items-center"
           initial={{ opacity: 0 }}
