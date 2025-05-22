@@ -58,7 +58,7 @@ function Navbar() {
     Cookies.remove("name");
     Cookies.remove("avatar");
     Cookies.remove("user");
-    window.location.href = "/login";
+    window.location.href = "/Login";
   };
 
   return (
