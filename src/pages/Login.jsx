@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import Cookies from "js-cookie"; // For handling cookies
+import Cookies from "js-cookie";
 import { motion } from "framer-motion";
 
-// Create a motion-enhanced Link for the Sign Up button
+// Create a motion-enhanced Link
 const MotionLink = motion(Link);
 
 function Login() {
@@ -24,8 +24,7 @@ function Login() {
       formData.append("username", email);
       formData.append("password", password);
 
-      // Updated backend URL for login
-      const response = await axios.post(
+      const loginResponse = await axios.post(
         "https://mominah-edulearnai.hf.space/auth/login",
         formData,
         {
@@ -35,15 +34,35 @@ function Login() {
         }
       );
 
-      if (response.status === 200) {
-        const { access_token, refresh_token, name, avatar } = response.data;
+      if (loginResponse.status === 200) {
+        const { access_token, refresh_token } = loginResponse.data;
+
+        // Store tokens securely
         Cookies.set("access_token", access_token, { expires: 7, secure: true });
         Cookies.set("refresh_token", refresh_token, { expires: 7, secure: true });
-        Cookies.set("name", name, { expires: 7, secure: true });
-        if (avatar) {
-          Cookies.set("avatar", avatar, { expires: 7, secure: true });
+
+        // Now fetch user data using the access token
+        const userDataResponse = await axios.get(
+          "https://mominah-edulearnai.hf.space/auth/user/data",
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          }
+        );
+
+        if (userDataResponse.status === 200) {
+          const { name, avatar } = userDataResponse.data;
+
+          // Store user info in cookies (or localStorage)
+          Cookies.set("name", name, { expires: 7, secure: true });
+          if (avatar) {
+            Cookies.set("avatar", avatar, { expires: 7, secure: true });
+          }
+
+          // Redirect after full auth + data load
+          navigate("/services");
         }
-        navigate("/services");
       }
     } catch (error) {
       if (error.response) {
@@ -142,16 +161,14 @@ function Login() {
           </motion.button>
         </form>
 
-        {/* Updated Sign Up Button */}
+        {/* Sign Up Button */}
         <motion.div
           className="mt-4 flex flex-col items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
         >
-          <p className="text-sm text-gray-600 mb-2">
-            Don't have an account?
-          </p>
+          <p className="text-sm text-gray-600 mb-2">Don't have an account?</p>
           <MotionLink
             to="/signup"
             className="interactive bg-yellow-400 text-white font-semibold py-2 px-6 rounded-full shadow-md hover:bg-yellow-500 transition duration-300"
