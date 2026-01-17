@@ -44,7 +44,7 @@ function SignUp() {
       }
 
       const response = await axios.post(
-        "https://mominah-edulearnai.hf.space/auth/signup",
+        "https://edulearnai-edulearnai.hf.space/auth/signup",
         formData,
         {
           headers: {
