@@ -3,7 +3,7 @@ import Sidebar from '../components/sidebar'
 import Result  from '../components/result'
 
 // ─── API UTILITIES (module-scoped, no extra exports) ───────────────────────────
-const API_BASE_URL = 'https://mominah-edulearnai.hf.space'
+const API_BASE_URL = 'https://edulearnai-edulearnai.hf.space'
 const API_ENDPOINTS = {
   PROCESS: 'check/process',
   DOWNLOAD: 'check/download',
