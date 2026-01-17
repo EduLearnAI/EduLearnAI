@@ -4,7 +4,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import ReactMarkdown from "react-markdown";
 
-const backendBaseUrl = "https://mominah-edulearnai.hf.space";
+const backendBaseUrl = "https://edulearnai-edulearnai.hf.space";
 const token = Cookies.get("access_token");
 
 export default function VideoRagPage() {
