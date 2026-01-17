@@ -26,7 +26,7 @@ function Login() {
 
       // Updated backend URL for login
       const response = await axios.post(
-        "https://mominah-edulearnai.hf.space/auth/login",
+        "https://edulearnai-edulearnai.hf.space/auth/login",
         formData,
         {
           headers: {
