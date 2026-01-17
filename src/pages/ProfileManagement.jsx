@@ -14,7 +14,7 @@ function ProfileManagement() {
   const [loading, setLoading] = useState(false);
 
   const access_token = Cookies.get("access_token");
-  const backendBaseUrl = "https://mominah-edulearnai.hf.space";
+  const backendBaseUrl = "https://edulearnai-edulearnai.hf.space";
 
   useEffect(() => {
     if (!access_token) return;
