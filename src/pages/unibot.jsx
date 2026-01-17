@@ -3,7 +3,7 @@ import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import { FiSend, FiPaperclip } from 'react-icons/fi'
 
-const backendBaseUrl = 'https://mominah-edulearnai.hf.space'
+const backendBaseUrl = 'https://edulearnai-edulearnai.hf.space'
 
 export default function UniBot() {
   const [messages, setMessages] = useState([])
