@@ -5,7 +5,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import ReactMarkdown from "react-markdown";
 
-const backendBaseUrl = "https://mominah-edulearnai.hf.space";
+const backendBaseUrl = "https://edulearnai-edulearnai.hf.space";
 
 const ChatbotPage = () => {
   const navigate = useNavigate();
